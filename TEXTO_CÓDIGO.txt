@@ -1,8 +1,25 @@
+import pandas as pd
 
-Claro, posso ajudar a reestruturar o texto para torná-lo mais claro e coeso. Aqui está uma versão revisada:
+# Lista dos caminhos dos arquivos Excel
+caminhos = [
+    "caminho/para/o/arquivo1.xlsx",
+    "caminho/para/o/arquivo2.xlsx",
+    # Adicione mais caminhos conforme necessário
+]
 
-Conceito de Cash In, Cash Out
+# Dicionário para armazenar o nome do arquivo e a quantidade de linhas
+contagem_linhas = {}
 
-Exemplo: Consideremos o fluxo de caixa em uma empresa. Tomemos, por exemplo, uma empresa que vende papel. Todo o dinheiro que entra na empresa, seja através de pagamentos com cartão ou por outras formas, como PIX, constitui o "Cash In" (entrada de caixa). É importante considerar todas as formas de pagamento para entender o fluxo total de entrada de recursos.
+for caminho in caminhos:
+    try:
+        # Lendo o arquivo Excel
+        df = pd.read_excel(caminho)
+        # Contando as linhas e armazenando no dicionário
+        contagem_linhas[caminho] = len(df)
+    except Exception as e:
+        # Em caso de erro, armazena a mensagem de erro
+        contagem_linhas[caminho] = str(e)
 
-Por outro lado, o "Cash Out" (saída de caixa) engloba todos os pagamentos e despesas, incluindo taxas bancárias e outros custos operacionais. Compreender ambos os aspectos, tanto os recebimentos quanto os pagamentos, é crucial para o gerenciamento eficaz das finanças empresariais. Isso inclui monitorar todas as receitas, independentemente de serem acompanhadas de tarifas bancárias ou não.
+# Exibindo os resultados
+for arquivo, linhas in contagem_linhas.items():
+    print(f"Arquivo: {arquivo}, Linhas: {linhas}")
