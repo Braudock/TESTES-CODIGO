@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 
 # Lista dos caminhos dos arquivos Excel
 caminhos = [
@@ -14,12 +15,15 @@ for caminho in caminhos:
     try:
         # Lendo o arquivo Excel
         df = pd.read_excel(caminho)
+        # Extraindo apenas o nome do arquivo do caminho completo
+        nome_arquivo = os.path.basename(caminho)
         # Contando as linhas e armazenando no dicionário
-        contagem_linhas[caminho] = len(df)
+        contagem_linhas[nome_arquivo] = len(df)
     except Exception as e:
         # Em caso de erro, armazena a mensagem de erro
-        contagem_linhas[caminho] = str(e)
+        nome_arquivo = os.path.basename(caminho)
+        contagem_linhas[nome_arquivo] = str(e)
 
 # Exibindo os resultados
-for arquivo, linhas in contagem_linhas.items():
-    print(f"Arquivo: {arquivo}, Linhas: {linhas}")
+for nome, linhas in contagem_linhas.items():
+    print(f"Arquivo: {nome}, Linhas: {linhas}")
