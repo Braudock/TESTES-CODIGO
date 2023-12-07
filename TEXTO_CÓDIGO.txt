@@ -1,29 +1,19 @@
 import pandas as pd
-import os
 
-# Lista dos caminhos dos arquivos Excel
-caminhos = [
-    "caminho/para/o/arquivo1.xlsx",
-    "caminho/para/o/arquivo2.xlsx",
-    # Adicione mais caminhos conforme necessário
-]
+def replace_dot_with_comma(file_path):
+    # Lendo o arquivo Excel
+    df = pd.read_excel(file_path)
 
-# Dicionário para armazenar o nome do arquivo e a quantidade de linhas
-contagem_linhas = {}
+    # Substituindo pontos por vírgulas em todas as células que são strings
+    df = df.applymap(lambda x: x.replace('.', ',') if isinstance(x, str) else x)
 
-for caminho in caminhos:
-    try:
-        # Lendo o arquivo Excel
-        df = pd.read_excel(caminho)
-        # Extraindo apenas o nome do arquivo do caminho completo
-        nome_arquivo = os.path.basename(caminho)
-        # Contando as linhas e armazenando no dicionário
-        contagem_linhas[nome_arquivo] = len(df)
-    except Exception as e:
-        # Em caso de erro, armazena a mensagem de erro
-        nome_arquivo = os.path.basename(caminho)
-        contagem_linhas[nome_arquivo] = str(e)
+    # Salvando o arquivo modificado
+    new_file_path = file_path.replace('.xlsx', '_modified.xlsx')
+    df.to_excel(new_file_path, index=False)
 
-# Exibindo os resultados
-for nome, linhas in contagem_linhas.items():
-    print(f"Arquivo: {nome}, Linhas: {linhas}")
+    return new_file_path
+
+# Exemplo de uso da função
+# file_path = 'caminho_para_seu_arquivo.xlsx'
+# new_file_path = replace_dot_with_comma(file_path)
+# print("Arquivo modificado salvo em:", new_file_path)
