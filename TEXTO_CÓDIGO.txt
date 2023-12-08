@@ -24,9 +24,14 @@ def filtrar_e_unir(df, segmento):
     return df[(df['SEGMENTO'] == segmento) & (df['Status'].isin(['MANTEVE', 'ENTROU']))]
 
 # Filtrar e unir dados para cada segmento
-final_business = filtrar_e_unir(merged_310, 'BUS').append(filtrar_e_unir(merged_312, 'BUS'), ignore_index=True)
-final_top = filtrar_e_unir(merged_310, 'TOP').append(filtrar_e_unir(merged_312, 'TOP'), ignore_index=True)
-final_pro = filtrar_e_unir(merged_310, 'PRO').append(filtrar_e_unir(merged_312, 'PRO'), ignore_index=True)
+final_business = filtrar_e_unir(merged_310, 'BUS')
+final_business = final_business.append(filtrar_e_unir(merged_312, 'BUS'), ignore_index=True)
+
+final_top = filtrar_e_unir(merged_310, 'TOP')
+final_top = final_top.append(filtrar_e_unir(merged_312, 'TOP'), ignore_index=True)
+
+final_pro = filtrar_e_unir(merged_310, 'PRO')
+final_pro = final_pro.append(filtrar_e_unir(merged_312, 'PRO'), ignore_index=True)
 
 # Substitua com o caminho onde deseja salvar o arquivo final
 caminho_arquivo_final = 'caminho_para_salvar/dados_processados.xlsx'
@@ -38,4 +43,3 @@ with pd.ExcelWriter(caminho_arquivo_final) as writer:
     final_pro.to_excel(writer, sheet_name='PRO', index=False)
 
 print("Arquivo salvo em:", caminho_arquivo_final)
-
