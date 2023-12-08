@@ -1,5 +1,42 @@
-PROC IMPORT DATAFILE="caminho_para_seu_arquivo.txt"
-    OUT=nome_do_dataset
-    DBMS=TAB REPLACE;
-    GETNAMES=YES;
-RUN;
+****************************************** CODIGO REFRESH ******************************************
+
+import pandas as pd
+
+# Substitua com o caminho completo dos seus arquivos Excel
+caminho_202310 = 'caminho_para_FLUXO_REDE_202310.xlsx'
+caminho_202312 = 'caminho_para_FLUXO_REDE_202312.xlsx'
+
+# Carregar os arquivos
+df_202310 = pd.read_excel(caminho_202310)
+df_202312 = pd.read_excel(caminho_202312)
+
+# Criar chaves de união
+df_202310['chave'] = df_202310['PLATAFORMA'] + '_' + df_202310['CNPJ']
+df_202312['chave'] = df_202312['PLATAFORMA'] + '_' + df_202312['CNPJ']
+
+# Procv
+merged_310 = df_202310.merge(df_202312[['chave']], on='chave', how='left', indicator=True)
+merged_310['Status'] = merged_310['_merge'].map({'left_only': 'SAIU', 'both': 'MANTEVE'})
+
+merged_312 = df_202312.merge(df_202310[['chave']], on='chave', how='left', indicator=True)
+merged_312['Status'] = merged_312['_merge'].map({'left_only': 'ENTROU', 'both': 'MANTEVE'})
+
+# Função para filtrar e unir dados
+def filtrar_e_unir(df, segmento):
+    return df[(df['SEGMENTO'] == segmento) & (df['Status'].isin(['MANTEVE', 'ENTROU']))]
+
+# Filtrar e unir dados para cada segmento
+final_business = filtrar_e_unir(merged_310, 'BUS').append(filtrar_e_unir(merged_312, 'BUS'))
+final_top = filtrar_e_unir(merged_310, 'TOP').append(filtrar_e_unir(merged_312, 'TOP'))
+final_pro = filtrar_e_unir(merged_310, 'PRO').append(filtrar_e_unir(merged_312, 'PRO'))
+
+# Substitua com o caminho onde deseja salvar o arquivo final
+caminho_arquivo_final = 'caminho_para_salvar/dados_processados.xlsx'
+
+# Salvar em um novo Excel
+with pd.ExcelWriter(caminho_arquivo_final) as writer:
+    final_business.to_excel(writer, sheet_name='BUSINESS', index=False)
+    final_top.to_excel(writer, sheet_name='TOP_BUSINESS', index=False)
+    final_pro.to_excel(writer, sheet_name='PRO', index=False)
+
+print("Arquivo salvo em:", caminho_arquivo_final)
