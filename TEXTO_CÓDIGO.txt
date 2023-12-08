@@ -21,7 +21,7 @@ merged_312['Status'] = merged_312['_merge'].map({'left_only': 'ENTROU', 'both': 
 
 # Função para filtrar e unir dados
 def filtrar_e_unir(df, segmento):
-  return df[(df['SEGMENTO'] == segmento) & (df['Status'].isin(['MANTEVE', 'ENTROU']))]
+  return df[(df['SEGMENTO'] == segmento) & (df['Status'].isin(['MANTEVE', 'ENTROU']))]
 
 # Filtrar e unir dados para cada segmento
 final_business = filtrar_e_unir(merged_310, 'BUS').concat([filtrar_e_unir(merged_312, 'BUS')], ignore_index=True)
@@ -33,8 +33,8 @@ caminho_arquivo_final = 'caminho_para_salvar/dados_processados.xlsx'
 
 # Salvar em um novo Excel
 with pd.ExcelWriter(caminho_arquivo_final) as writer:
-  final_business.to_excel(writer, sheet_name='BUSINESS', index=False)
-  final_top.to_excel(writer, sheet_name='TOP_BUSINESS', index=False)
-  final_pro.to_excel(writer, sheet_name='PRO', index=False)
+  final_business.to_excel(writer, sheet_name='BUSINESS', index=False)
+  final_top.to_excel(writer, sheet_name='TOP_BUSINESS', index=False)
+  final_pro.to_excel(writer, sheet_name='PRO', index=False)
 
 print("Arquivo salvo em:", caminho_arquivo_final)
