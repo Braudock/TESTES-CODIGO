@@ -1,70 +1,106 @@
-# Importa as bibliotecas necessárias
-import os
-from tkinter import filedialog, Tk
+import PySimpleGUI as sg
 import pandas as pd
+from datetime import datetime
+import locale
+import os
 
-# Define a função `get_filename_from_code()`
-def get_filename_from_code(code):
+# Configurações de localidade
+try:
+    locale.setlocale(locale.LC_TIME, 'pt_BR.UTF-8')
+except locale.Error:
+    try:
+        locale.setlocale(locale.LC_TIME, 'ptb_bra')
+    except locale.Error:
+        print("Local para português não encontrado.")
 
-    # Obtém o código do arquivo
-    code = code.strip()
+# Caminho completo onde o arquivo Excel será salvo
+caminho_arquivo_excel = 'C:\\Users\\BRAUD\\OneDrive\\Área de Trabalho\\PASTAS\\ATIVIDADES\\tarefas.xlsx'
 
-    # Remove os espaços em branco do código
-    code = code.replace(" ", "")
+# Função para ler as tarefas do Excel
+def ler_tarefas_do_excel():
+    if os.path.exists(caminho_arquivo_excel):
+        return pd.read_excel(caminho_arquivo_excel)
+    else:
+        return pd.DataFrame(columns=['Status', 'Tarefa', 'Data', 'Hora'])
 
-    # Adiciona a extensão ".txt" ao código
-    filename = code + ".txt"
+# Função para limpar o arquivo Excel
+def resetar_excel():
+    pd.DataFrame(columns=['Status', 'Tarefa', 'Data', 'Hora']).to_excel(caminho_arquivo_excel, index=False)
 
-    return filename
+# Função para criar a janela
+def criar_janela_inicial(tarefas):
+    sg.theme('DarkBlue4')
+    layout_tarefas = [
+        [sg.Checkbox('', key=f'check_{index}', default=row['Status'] == 'Concluído'), sg.Input(row['Tarefa'], key=f'tarefa_{index}'), sg.Input(row['Data'], size=(20,1), key=f'data_{index}'), sg.CalendarButton('Escolher Data', target=f'data_{index}', format='%d/%m/%Y'), sg.Input(row['Hora'], size=(10,1), key=f'hora_{index}'), sg.Button('Hora', key=f'set_hora_{index}')]
+        for index, row in tarefas.iterrows()
+    ]
+    layout = [
+        [sg.Frame('Tarefas', layout=layout_tarefas, key='container')],
+        [sg.Combo(['Tudo', 'Concluído', 'Não Concluído'], default_value='Tudo', key='filtro'), sg.Button('Filtrar')],
+        [sg.Button('Nova Tarefa'), sg.Button('Resetar'), sg.Button('Salvar', key='salvar')]
+    ]
+    return sg.Window('Lista de Tarefas', layout=layout, finalize=True)
 
-# Define a função `process_files_in_folder()`
-def process_files_in_folder(folder_path):
+# Função para salvar dados em Excel
+def salvar_em_excel(dados):
+    df = pd.DataFrame(dados, columns=['Status', 'Tarefa', 'Data', 'Hora'])
+    df.to_excel(caminho_arquivo_excel, index=False)
 
-    # Inicializa uma lista para armazenar as estatísticas
-    stats = []
+# Função para abrir uma janela de diálogo para escolher a hora
+def escolher_hora():
+    layout = [
+        [sg.Text('Escolha a hora de término:')],
+        [sg.Input(size=(20, 1), key='hora')],
+        [sg.Ok(), sg.Cancel()]
+    ]
+    janela_hora = sg.Window('Escolher Hora', layout)
+    evento, valores = janela_hora.read()
+    janela_hora.close()
+    return valores['hora'] if evento == 'Ok' else None
 
-    # Itera pelos arquivos na pasta
-    for filename in os.listdir(folder_path):
+# Iniciar com as tarefas do Excel
+tarefas_df = ler_tarefas_do_excel()
+janela = criar_janela_inicial(tarefas_df)
 
-        # Verifica se o arquivo é um arquivo .txt
-        if filename.endswith('.txt'):
+# Loop de eventos
+while True:
+    evento, valores = janela.read()
 
-            # Obtém o caminho do arquivo
-            file_path = os.path.join(folder_path, filename)
+    if evento == sg.WIN_CLOSED:
+        break
+    elif evento == 'Nova Tarefa':
+        # Gera uma chave única baseada no tempo atual para evitar sobreposições
+        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+        janela.extend_layout(janela['container'], [[sg.Checkbox('', key=f'check_{timestamp}'), sg.Input('', key=f'tarefa_{timestamp}'), sg.Input('', size=(20,1), key=f'data_{timestamp}'), sg.CalendarButton('Escolher Data', target=f'data_{timestamp}', format='%d/%m/%Y'), sg.Input('', size=(10,1), key=f'hora_{timestamp}'), sg.Button('Hora', key=f'set_hora_{timestamp}')]])
+    elif evento == 'Resetar':
+        resetar_excel()  # Limpa o arquivo Excel
+        janela.close()
+        tarefas_df = ler_tarefas_do_excel()  # Recarregar as tarefas do Excel, que agora estarão vazias
+        janela = criar_janela_inicial(tarefas_df)
+    elif evento.startswith('set_hora'):
+        chave_hora = evento.split('_')[-1]
+        hora_escolhida = escolher_hora()
+        if hora_escolhida:
+            janela[f'hora_{chave_hora}'].update(hora_escolhida)
+    elif evento == 'salvar':
+        tarefas = []
+        for key in filter(lambda k: isinstance(k, str) and 'tarefa_' in k, valores):
+            timestamp = key.split('_')[1]
+            status = 'Concluído' if valores.get(f'check_{timestamp}', False) else 'Não Concluído'
+            tarefa = valores[key]
+            data = valores.get(f'data_{timestamp}', '')
+            hora = valores.get(f'hora_{timestamp}', '')
+            tarefas.append([status, tarefa, data, hora])
+        salvar_em_excel(tarefas)
+    elif evento == 'Filtrar':
+        filtro = valores['filtro']
+        if filtro == 'Tudo':
+            tarefas_filtradas = tarefas_df
+        elif filtro == 'Concluído':
+            tarefas_filtradas = tarefas_df[tarefas_df['Status'] == 'Concluído']
+        else:
+            tarefas_filtradas = tarefas_df[tarefas_df['Status'] == 'Não Concluído']
+        janela.close()
+        janela = criar_janela_inicial(tarefas_filtradas)
 
-            # Lê o conteúdo do arquivo
-            with open(file_path, 'r', encoding="utf-8") as file:
-                data = file.read()
-
-            # Obtém as linhas do arquivo
-            lines = data.splitlines()
-
-            # Obtém o código do arquivo
-            code = lines[0].split()[0]
-
-            # Adiciona as estatísticas à lista
-            stats.append({
-                "filename": get_filename_from_code(code),
-                "line_count": len(lines),
-                "total_meta": None
-            })
-
-    # Retorna a lista de estatísticas
-    return stats
-
-# Inicializa a função principal
-if __name__ == '__main__':
-
-    # Obtém o caminho da pasta selecionada
-    folder = select_folder()
-
-    # Calcula as estatísticas sobre os arquivos na pasta
-    results = process_files_in_folder(folder)
-
-    # Converte as estatísticas em um DataFrame
-    df_results = pd.DataFrame(results)
-
-    # Salva as estatísticas em um arquivo Excel
-    output_filename = os.path.join(folder, 'stats_results.xlsx')
-    df_results.to_excel(output_filename, index=False)
-
+janela.close()
