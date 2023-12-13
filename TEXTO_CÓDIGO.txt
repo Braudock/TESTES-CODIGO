@@ -1,1 +1,27 @@
+import time
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
+
+class MeuHandler(FileSystemEventHandler):
+    def on_created(self, event):
+        # Este método é chamado quando um arquivo é criado
+        if event.is_directory:
+            return None
+        else:
+            print(f"Arquivo criado: {event.src_path} às {time.ctime()}")
+
+if __name__ == "__main__":
+    caminho = "/caminho/para/sua/pasta"  # Defina o caminho da pasta que você deseja monitorar
+
+    event_handler = MeuHandler()
+    observer = Observer()
+    observer.schedule(event_handler, path=caminho, recursive=False)
+    observer.start()
+
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        observer.stop()
+    observer.join()
 
