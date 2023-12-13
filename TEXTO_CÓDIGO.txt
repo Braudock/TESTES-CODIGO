@@ -1,1 +1,70 @@
+# Importa as bibliotecas necessárias
+import os
+from tkinter import filedialog, Tk
+import pandas as pd
+
+# Define a função `get_filename_from_code()`
+def get_filename_from_code(code):
+
+    # Obtém o código do arquivo
+    code = code.strip()
+
+    # Remove os espaços em branco do código
+    code = code.replace(" ", "")
+
+    # Adiciona a extensão ".txt" ao código
+    filename = code + ".txt"
+
+    return filename
+
+# Define a função `process_files_in_folder()`
+def process_files_in_folder(folder_path):
+
+    # Inicializa uma lista para armazenar as estatísticas
+    stats = []
+
+    # Itera pelos arquivos na pasta
+    for filename in os.listdir(folder_path):
+
+        # Verifica se o arquivo é um arquivo .txt
+        if filename.endswith('.txt'):
+
+            # Obtém o caminho do arquivo
+            file_path = os.path.join(folder_path, filename)
+
+            # Lê o conteúdo do arquivo
+            with open(file_path, 'r', encoding="utf-8") as file:
+                data = file.read()
+
+            # Obtém as linhas do arquivo
+            lines = data.splitlines()
+
+            # Obtém o código do arquivo
+            code = lines[0].split()[0]
+
+            # Adiciona as estatísticas à lista
+            stats.append({
+                "filename": get_filename_from_code(code),
+                "line_count": len(lines),
+                "total_meta": None
+            })
+
+    # Retorna a lista de estatísticas
+    return stats
+
+# Inicializa a função principal
+if __name__ == '__main__':
+
+    # Obtém o caminho da pasta selecionada
+    folder = select_folder()
+
+    # Calcula as estatísticas sobre os arquivos na pasta
+    results = process_files_in_folder(folder)
+
+    # Converte as estatísticas em um DataFrame
+    df_results = pd.DataFrame(results)
+
+    # Salva as estatísticas em um arquivo Excel
+    output_filename = os.path.join(folder, 'stats_results.xlsx')
+    df_results.to_excel(output_filename, index=False)
 
