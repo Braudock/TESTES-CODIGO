@@ -1,171 +1,60 @@
-import PySimpleGUI as sg
-import pandas as pd
-from datetime import datetime
-import locale
-import os
-
-# Configurações de localidade
-try:
-    locale.setlocale(locale.LC_TIME, 'pt_BR.UTF-8')
-except locale.Error:
-    try:
-        locale.setlocale(locale.LC_TIME, 'ptb_bra')
-    except locale.Error:
-        print("Local para português não encontrado.")
-
-# Caminho completo onde o arquivo Excel será salvo
-caminho_arquivo_excel = 'C:\\Users\\BRAUD\\OneDrive\\Área de Trabalho\\PASTAS\\ATIVIDADES\\tarefas.xlsx'
-
-# Função para ler as tarefas do Excel
-def ler_tarefas_do_excel():
-    if os.path.exists(caminho_arquivo_excel):
-        return pd.read_excel(caminho_arquivo_excel)
-    else:
-        return pd.DataFrame(columns=['Status', 'Tarefa', 'Data', 'Hora'])
-
-# Função para limpar o arquivo Excel
-def resetar_excel():
-    pd.DataFrame(columns=['Status', 'Tarefa', 'Data', 'Hora']).to_excel(caminho_arquivo_excel, index=False)
-
-# Função para criar a janela
-def criar_janela_inicial(tarefas):
-    sg.theme('DarkBlue4')
-    layout_tarefas = [
-        [sg.Checkbox('', key=f'check_{index}', default=row['Status'] == 'Concluído'), sg.Input(row['Tarefa'], key=f'tarefa_{index}'), sg.Input(row['Data'], size=(20,1), key=f'data_{index}'), sg.CalendarButton('Escolher Data', target=f'data_{index}', format='%d/%m/%Y'), sg.Input(row['Hora'], size=(10,1), key=f'hora_{index}'), sg.Button('Hora', key=f'set_hora_{index}')]
-        for index, row in tarefas.iterrows()
-    ]
-    layout = [
-        [sg.Frame('Tarefas', layout=layout_tarefas, key='container')],
-        [sg.Combo(['Tudo', 'Concluído', 'Não Concluído'], default_value='Tudo', key='filtro'), sg.Button('Filtrar')],
-        [sg.Button('Nova Tarefa'), sg.Button('Resetar'), sg.Button('Salvar', key='salvar')]
-    ]
-    return sg.Window('Lista de Tarefas', layout=layout, finalize=True)
-
-# Função para salvar dados em Excel
-def salvar_em_excel(dados):
-    df = pd.DataFrame(dados, columns=['Status', 'Tarefa', 'Data', 'Hora'])
-    df.to_excel(caminho_arquivo_excel, index=False)
-
-# Função para abrir uma janela de diálogo para escolher a hora
-def escolher_hora():
-    layout = [
-        [sg.Text('Escolha a hora de término:')],
-        [sg.Input(size=(20, 1), key='hora')],
-        [sg.Ok(), sg.Cancel()]
-    ]
-    janela_hora = sg.Window('Escolher Hora', layout)
-    evento, valores = janela_hora.read()
-    janela_hora.close()
-    return valores['hora'] if evento == 'Ok' else None
-
-# Iniciar com as tarefas do Excel
-tarefas_df = ler_tarefas_do_excel()
-janela = criar_janela_inicial(tarefas_df)
-
-# Loop de eventos
-while True:
-    evento, valores = janela.read()
-
-    if evento == sg.WIN_CLOSED:
-        break
-    elif evento == 'Nova Tarefa':
-        # Gera uma chave única baseada no tempo atual para evitar sobreposições
-        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-        janela.extend_layout(janela['container'], [[sg.Checkbox('', key=f'check_{timestamp}'), sg.Input('', key=f'tarefa_{timestamp}'), sg.Input('', size=(20,1), key=f'data_{timestamp}'), sg.CalendarButton('Escolher Data', target=f'data_{timestamp}', format='%d/%m/%Y'), sg.Input('', size=(10,1), key=f'hora_{timestamp}'), sg.Button('Hora', key=f'set_hora_{timestamp}')]])
-    elif evento == 'Resetar':
-        resetar_excel()  # Limpa o arquivo Excel
-        janela.close()
-        tarefas_df = ler_tarefas_do_excel()  # Recarregar as tarefas do Excel, que agora estarão vazias
-        janela = criar_janela_inicial(tarefas_df)
-    elif evento.startswith('set_hora'):
-        chave_hora = evento.split('_')[-1]
-        hora_escolhida = escolher_hora()
-        if hora_escolhida:
-            janela[f'hora_{chave_hora}'].update(hora_escolhida)
-    elif evento == 'salvar':
-        tarefas = []
-        for key in filter(lambda k: isinstance(k, str) and 'tarefa_' in k, valores):
-            timestamp = key.split('_')[1]
-            status = 'Concluído' if valores.get(f'check_{timestamp}', False) else 'Não Concluído'
-            tarefa = valores[key]
-            data = valores.get(f'data_{timestamp}', '')
-            hora = valores.get(f'hora_{timestamp}', '')
-            tarefas.append([status, tarefa, data, hora])
-        salvar_em_excel(tarefas)
-    elif evento == 'Filtrar':
-        filtro = valores['filtro']
-        if filtro == 'Tudo':
-            tarefas_filtradas = tarefas_df
-        elif filtro == 'Concluído':
-            tarefas_filtradas = tarefas_df[tarefas_df['Status'] == 'Concluído']
-        else:
-            tarefas_filtradas = tarefas_df[tarefas_df['Status'] == 'Não Concluído']
-        janela.close()
-        janela = criar_janela_inicial(tarefas_filtradas)
-
-janela.close()
-
-
-
-
-
-******************************************************************************************************************************************
-
-
-
-
-
 import os
 from tkinter import filedialog, Tk
 import pandas as pd
 
+# Supondo que você tenha o DataFrame da seguinte forma (substitua isso pelos seus dados reais):
+df_codigos = pd.DataFrame({
+    'CODIGO': [8020, 8021, 8022, 8023, 8024, 8025],
+    'ITEM': ['ALAVANCA - PAGAMENTOS', 'FLUXO PAGAMENTOS', 'ALAVANCA - PAGAMENTOS', 'ALAVANCA - FLEX', 'ALAVANCA - PAGAMENTOS'],
+    'SEGMENTO': ['BUS', 'BUS', 'PRO', 'PRO', 'REN'],
+    'ATIVO': ['NÃO', 'SIM', 'NÃO', 'SIM', 'NÃO']
+})
+
 def select_folder():
-    """Retorna o caminho da pasta selecionada pelo usuário"""
     root = Tk()
-    root.withdraw()  # we don't want a full GUI, so keep the root window from appearing
-    folder_selected = filedialog.askdirectory()  # show an "Open" dialog box and return the path to the selected folder
+    root.withdraw()  # We don't want a full GUI, so keep the root window from appearing
+    folder_selected = filedialog.askdirectory()  # Show the dialog and return the selected folder path
     return folder_selected
 
-def process_files_in_folder(folder_path, itens_ativos_dict):
-    """Processa os arquivos na pasta especificada e retorna estatísticas dos arquivos que correspondem aos itens ativos"""
+def process_files_in_folder(folder_path, df_codigos):
     stats = []
-    arquivos_encontrados = []
 
     for filename in os.listdir(folder_path):
         if filename.endswith('.txt'):
-            # Supondo que o nome do arquivo seja algo como 'CODIGO_ITEM_outrasinfos.txt'
-            file_code, file_item = filename.split('_')[:2]  # Ajuste conforme o formato real do seu arquivo
+            # Extrai o código do nome do arquivo
+            code = filename.split('_')[3]
+            # Busca as informações no DataFrame com base no código
+            if int(code) in df_codigos['CODIGO'].values:
+                file_info = df_codigos[df_codigos['CODIGO'] == int(code)].iloc[0]
+            else:
+                file_info = {'ITEM': 'Desconhecido', 'SEGMENTO': 'Desconhecido', 'ATIVO': 'Desconhecido'}
+            
+            file_path = os.path.join(folder_path, filename)
+            with open(file_path, 'r', encoding='utf-8') as file:
+                lines = file.read().splitlines()
 
-            if (file_code, file_item) in itens_ativos_dict:
-                arquivos_encontrados.append(filename)
-                file_path = os.path.join(folder_path, filename)
-                with open(file_path, 'r', encoding='utf-8') as file:
-                    data = file.read()
-                    lines = data.splitlines()
+            try:
+                df = pd.read_csv(file_path, sep="\t")
+                df['meta'] = df['meta'].str.replace(',', '.').str.replace(';', '.').astype(float)
+                total_meta = df['meta'].sum()
+            except Exception as e:
+                print(f"Erro ao processar o arquivo {filename}: {e}")
+                total_meta = None
 
-                stats.append({
-                    'filename': filename,
-                    'line_count': len(lines),
-                    # Aqui você pode adicionar outras estatísticas se necessário
-                })
+            stats.append({
+                'ITEM': file_info['ITEM'],
+                'SEGMENTO': file_info['SEGMENTO'],
+                'ATIVO': file_info['ATIVO'],
+                'line_count': len(lines),
+                'total_meta': total_meta
+            })
 
-    return stats, arquivos_encontrados
-
-# Dicionário codificado com informações de 'CODIGO', 'ITEM', e 'SEGMENTO'
-itens_ativos_dict = {
-    ('123', 'A'): 'Segmento1',
-    ('456', 'B'): 'Segmento2',
-    # Adicione mais entradas conforme necessário
-}
+    return stats
 
 if __name__ == '__main__':
     folder = select_folder()
-    stats, matching_files = process_files_in_folder(folder, itens_ativos_dict)
-
-    # Convertendo os resultados em um DataFrame e salvando em um arquivo Excel
-    df_stats = pd.DataFrame(stats)
+    results = process_files_in_folder(folder, df_codigos)
+    df_results = pd.DataFrame(results)
     output_filename = os.path.join(folder, 'stats_results.xlsx')
-    df_stats.to_excel(output_filename, index=False)
-
+    df_results.to_excel(output_filename, index=False)
     print(f"Resultados salvos em {output_filename}")
-    print(f"Arquivos encontrados: {matching_files}")
