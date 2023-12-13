@@ -104,3 +104,68 @@ while True:
         janela = criar_janela_inicial(tarefas_filtradas)
 
 janela.close()
+
+
+
+
+
+******************************************************************************************************************************************
+
+
+
+
+
+import os
+from tkinter import filedialog, Tk
+import pandas as pd
+
+def select_folder():
+    """Retorna o caminho da pasta selecionada pelo usuário"""
+    root = Tk()
+    root.withdraw()  # we don't want a full GUI, so keep the root window from appearing
+    folder_selected = filedialog.askdirectory()  # show an "Open" dialog box and return the path to the selected folder
+    return folder_selected
+
+def process_files_in_folder(folder_path, itens_ativos_dict):
+    """Processa os arquivos na pasta especificada e retorna estatísticas dos arquivos que correspondem aos itens ativos"""
+    stats = []
+    arquivos_encontrados = []
+
+    for filename in os.listdir(folder_path):
+        if filename.endswith('.txt'):
+            # Supondo que o nome do arquivo seja algo como 'CODIGO_ITEM_outrasinfos.txt'
+            file_code, file_item = filename.split('_')[:2]  # Ajuste conforme o formato real do seu arquivo
+
+            if (file_code, file_item) in itens_ativos_dict:
+                arquivos_encontrados.append(filename)
+                file_path = os.path.join(folder_path, filename)
+                with open(file_path, 'r', encoding='utf-8') as file:
+                    data = file.read()
+                    lines = data.splitlines()
+
+                stats.append({
+                    'filename': filename,
+                    'line_count': len(lines),
+                    # Aqui você pode adicionar outras estatísticas se necessário
+                })
+
+    return stats, arquivos_encontrados
+
+# Dicionário codificado com informações de 'CODIGO', 'ITEM', e 'SEGMENTO'
+itens_ativos_dict = {
+    ('123', 'A'): 'Segmento1',
+    ('456', 'B'): 'Segmento2',
+    # Adicione mais entradas conforme necessário
+}
+
+if __name__ == '__main__':
+    folder = select_folder()
+    stats, matching_files = process_files_in_folder(folder, itens_ativos_dict)
+
+    # Convertendo os resultados em um DataFrame e salvando em um arquivo Excel
+    df_stats = pd.DataFrame(stats)
+    output_filename = os.path.join(folder, 'stats_results.xlsx')
+    df_stats.to_excel(output_filename, index=False)
+
+    print(f"Resultados salvos em {output_filename}")
+    print(f"Arquivos encontrados: {matching_files}")
