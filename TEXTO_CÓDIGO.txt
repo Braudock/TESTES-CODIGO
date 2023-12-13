@@ -2,7 +2,7 @@ import os
 from tkinter import filedialog, Tk
 import pandas as pd
 
-# Supondo que você tenha o DataFrame da seguinte forma (substitua isso pelos seus dados reais):
+# DataFrame de exemplo (substitua pelos seus dados reais)
 df_codigos = pd.DataFrame({
     'CODIGO': [8020, 8021, 8022, 8023, 8024, 8025],
     'ITEM': ['ALAVANCA - PAGAMENTOS', 'FLUXO PAGAMENTOS', 'ALAVANCA - PAGAMENTOS', 'ALAVANCA - FLEX', 'ALAVANCA - PAGAMENTOS'],
@@ -12,8 +12,8 @@ df_codigos = pd.DataFrame({
 
 def select_folder():
     root = Tk()
-    root.withdraw()  # We don't want a full GUI, so keep the root window from appearing
-    folder_selected = filedialog.askdirectory()  # Show the dialog and return the selected folder path
+    root.withdraw()
+    folder_selected = filedialog.askdirectory()
     return folder_selected
 
 def process_files_in_folder(folder_path, df_codigos):
@@ -21,31 +21,25 @@ def process_files_in_folder(folder_path, df_codigos):
 
     for filename in os.listdir(folder_path):
         if filename.endswith('.txt'):
-            # Extrai o código do nome do arquivo
             code = filename.split('_')[3]
-            # Busca as informações no DataFrame com base no código
-            if int(code) in df_codigos['CODIGO'].values:
-                file_info = df_codigos[df_codigos['CODIGO'] == int(code)].iloc[0]
-            else:
-                file_info = {'ITEM': 'Desconhecido', 'SEGMENTO': 'Desconhecido', 'ATIVO': 'Desconhecido'}
+            file_info = df_codigos[df_codigos['CODIGO'] == int(code)].iloc[0] if int(code) in df_codigos['CODIGO'].values else {'ITEM': 'Desconhecido', 'SEGMENTO': 'Desconhecido', 'ATIVO': 'Desconhecido'}
             
             file_path = os.path.join(folder_path, filename)
-            with open(file_path, 'r', encoding='utf-8') as file:
-                lines = file.read().splitlines()
-
             try:
                 df = pd.read_csv(file_path, sep="\t")
                 df['meta'] = df['meta'].str.replace(',', '.').str.replace(';', '.').astype(float)
                 total_meta = df['meta'].sum()
+                line_count = len(df)
             except Exception as e:
                 print(f"Erro ao processar o arquivo {filename}: {e}")
                 total_meta = None
+                line_count = 0
 
             stats.append({
                 'ITEM': file_info['ITEM'],
                 'SEGMENTO': file_info['SEGMENTO'],
                 'ATIVO': file_info['ATIVO'],
-                'line_count': len(lines),
+                'line_count': line_count,
                 'total_meta': total_meta
             })
 
