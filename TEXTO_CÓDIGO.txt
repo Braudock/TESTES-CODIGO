@@ -1,27 +1,53 @@
-import time
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
+import saspy
 
-class MeuHandler(FileSystemEventHandler):
-    def on_created(self, event):
-        # Este método é chamado quando um arquivo é criado
-        if event.is_directory:
-            return None
-        else:
-            print(f"Arquivo criado: {event.src_path} às {time.ctime()}")
+# Configure isso para corresponder ao seu arquivo de configuração do SASPy
+cfgname = 'default'
 
-if __name__ == "__main__":
-    caminho = "/caminho/para/sua/pasta"  # Defina o caminho da pasta que você deseja monitorar
+# Iniciar uma sessão SAS
+sas = saspy.SASsession(cfgname=cfgname)
 
-    event_handler = MeuHandler()
-    observer = Observer()
-    observer.schedule(event_handler, path=caminho, recursive=False)
-    observer.start()
+# Verifique se a conexão foi bem-sucedida
+if sas:
+    print('Conexão SAS estabelecida.')
+else:
+    print('Falha ao estabelecer conexão SAS.')
+    # Handle the connection failure as needed
+    exit()
 
-    try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        observer.stop()
-    observer.join()
+# O código SAS a ser executado
+sas_code = """
+PROC SQL;
+CREATE TABLE ALL_DATASETS AS 
+SELECT 
+    MEMNAME AS NOME_DA_BASE,
+    CRDATE AS DATA_ATUALIZACAO,
+    NOBS AS NUMERO_DE_LINHAS,
+    FILESIZE/1000 AS TAMANHO_FORMAT=COMMAX20.,
+    CASE 
+        WHEN NOBS = 0 THEN 'S/INFO'
+        ELSE 'C/INFO'
+    END AS STATUS_BASE
+FROM DICTIONARY.TABLES
+WHERE LIBNAME IN ('OUTCOB', 'INFOP3')
+    AND (
+        INDEX(UPCASE(MEMNAME), 'TB3099_CBR_ENTR_D') > 0 OR
+        INDEX(UPCASE(MEMNAME), 'TB3012_CBR_LIQ_DESC_D') > 0 OR
+        INDEX(UPCASE(MEMNAME), 'TB5010_OR_CODE_LIQ_D') > 0 OR
+        INDEX(UPCASE(MEMNAME), 'TBL_920_PIX_EVENTOS_CAD_202312') > 0 OR
+        INDEX(UPCASE(MEMNAME), 'TBL_801_LIQUIDACAO_CIP_202312') > 0 OR
+        INDEX(UPCASE(MEMNAME), 'TBL_606_REDE_FLEX_202312') > 0 OR
+        INDEX(UPCASE(MEMNAME), 'TBL_602_REDE_RAV_202312') > 0 OR
+        INDEX(UPCASE(MEMNAME), 'TBL_901_FLUXO_PAG_202312') > 0
+    )
+ORDER BY MEMNAME;
+QUIT;
+"""
 
+# Execute o código SAS
+result = sas.submit(sas_code)
+
+# O resultado será um dicionário. A chave 'LOG' contém o log do SAS
+print(result['LOG'])
+
+# Encerra a sessão SAS
+sas.endsas()
