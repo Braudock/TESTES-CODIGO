@@ -1,48 +1,55 @@
 import saspy
 
-# Configuração da conexão SAS. Isto dependerá do seu ambiente específico.
-sas_session = saspy.SASsession(cfgname='your_config_name')
+# Configuração da conexão SAS. Substitua 'your_config_name' pelo nome da configuração que corresponde
+# à sua configuração no arquivo sascfg_personal.py.
+sas = saspy.SASsession(cfgname='your_config_name')
 
-# Atribuir as bibliotecas OUTCOB e INFOP3
-# A suposição aqui é que você tem caminhos de sistema de arquivos para essas bibliotecas.
-# Se as bibliotecas estiverem em um banco de dados ou um servidor remoto, você precisará usar as opções adequadas.
-sas_session.saslib('OUTCOB', path='path_to_OUTCOB')
-sas_session.saslib('INFOP3', path='path_to_INFOP3')
+# Verifique se a sessão SAS foi iniciada corretamente
+if sas:
+  print('Conexão SAS estabelecida.')
+else:
+  print('Falha ao estabelecer conexão SAS.')
+  # Finalize aqui se a conexão falhar
+  exit()
+
+# Atribuir as bibliotecas OUTCOB e INFOP3. Substitua os caminhos fictícios pelos caminhos reais em seu ambiente.
+sas.saslib('OUTCOB', path='caminho/para/OUTCOB')
+sas.saslib('INFOP3', path='caminho/para/INFOP3')
 
 # O código SAS a ser executado
 sas_code = """
 PROC SQL;
-CREATE TABLE ALL_DATASETS AS 
-SELECT 
-    MEMNAME AS NOME_DA_BASE,
-    CRDATE AS DATA_ATUALIZACAO,
-    NOBS AS NUMERO_DE_LINHAS,
-    FILESIZE/1000 AS TAMANHO_FORMAT=COMMAX20.,
-    CASE 
-        WHEN NOBS = 0 THEN 'S/INFO'
-        ELSE 'C/INFO'
-    END AS STATUS_BASE
+CREATE TABLE ALL_DATASETS AS 
+SELECT 
+  MEMNAME AS NOME_DA_BASE,
+  CRDATE AS DATA_ATUALIZACAO,
+  NOBS AS NUMERO_DE_LINHAS,
+  FILESIZE/1000 AS TAMANHO_FORMAT,
+  CASE 
+    WHEN NOBS = 0 THEN 'S/INFO'
+    ELSE 'C/INFO'
+  END AS STATUS_BASE
 FROM DICTIONARY.TABLES
 WHERE LIBNAME IN ('OUTCOB', 'INFOP3')
 AND (
-    INDEX(UPCASE(MEMNAME), 'TB3099_CBR_ENTR_D') > 0 OR
-    INDEX(UPCASE(MEMNAME), 'TB3012_CBR_LIQ_DESC_D') > 0 OR
-    INDEX(UPCASE(MEMNAME), 'TB5010_OR_CODE_LIQ_D') > 0 OR
-    INDEX(UPCASE(MEMNAME), 'TBL_920_PIX_EVENTOS_CAD_202312') > 0 OR
-    INDEX(UPCASE(MEMNAME), 'TBL_801_LIQUIDACAO_CIP_202312') > 0 OR
-    INDEX(UPCASE(MEMNAME), 'TBL_606_REDE_FLEX_202312') > 0 OR
-    INDEX(UPCASE(MEMNAME), 'TBL_602_REDE_RAV_202312') > 0 OR
-    INDEX(UPCASE(MEMNAME), 'TBL_901_FLUXO_PAG_202312') > 0
+  INDEX(UPCASE(MEMNAME),'TBL_801_LIQUIDACAO_CIP_202312') > 0 OR
+  INDEX(UPCASE(MEMNAME),'TB3099_CBR_ENTR_D') > 0 OR
+  INDEX(UPCASE(MEMNAME),'TB3012_CBR_LIQ_DESC_D') > 0 OR
+  INDEX(UPCASE(MEMNAME),'TB5010_OR_CODE_LIQ_D') > 0 OR
+  INDEX(UPCASE(MEMNAME),'TBL_920_PIX_EVENTOS_CAD_202312') > 0 OR
+  INDEX(UPCASE(MEMNAME),'TBL_606_REDE_FLEX_202312') > 0 OR
+  INDEX(UPCASE(MEMNAME),'TBL_602_REDE_RAV_202312') > 0 OR
+  INDEX(UPCASE(MEMNAME),'TBL_901_FLUXO_PAG_202312') > 0
 )
 ORDER BY MEMNAME;
 QUIT;
 """
 
 # Execute o código SAS
-result = sas_session.submit(sas_code)
+result = sas.submit(sas_code)
 
 # Verifique o log para quaisquer erros ou mensagens
 print(result['LOG'])
 
 # Finalize a sessão SAS quando terminar
-sas_session.endsas()
+sas.endsas()
