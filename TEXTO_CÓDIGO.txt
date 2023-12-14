@@ -1,53 +1,28 @@
-import saspy
-
-# Configure isso para corresponder ao seu arquivo de configuração do SASPy
-cfgname = 'default'
-
-# Iniciar uma sessão SAS
-sas = saspy.SASsession(cfgname=cfgname)
-
-# Verifique se a conexão foi bem-sucedida
-if sas:
-    print('Conexão SAS estabelecida.')
-else:
-    print('Falha ao estabelecer conexão SAS.')
-    # Handle the connection failure as needed
-    exit()
-
-# O código SAS a ser executado
-sas_code = """
 PROC SQL;
 CREATE TABLE ALL_DATASETS AS 
 SELECT 
     MEMNAME AS NOME_DA_BASE,
     CRDATE AS DATA_ATUALIZACAO,
     NOBS AS NUMERO_DE_LINHAS,
-    FILESIZE/1000 AS TAMANHO_FORMAT=COMMAX20.,
+    /* Certifique-se de que o formato do tamanho do arquivo está correto */
+    FILESIZE/1000 FORMAT=COMMAX20. AS TAMANHO_FORMAT,
+    /* A cláusula CASE deve ser escrita corretamente */
     CASE 
-        WHEN NOBS = 0 THEN 'S/INFO'
-        ELSE 'C/INFO'
+        WHEN NOBS = 0 THEN 'S/INFO' /* Sem informação */
+        ELSE 'C/INFO' /* Com informação */
     END AS STATUS_BASE
 FROM DICTIONARY.TABLES
 WHERE LIBNAME IN ('OUTCOB', 'INFOP3')
-    AND (
-        INDEX(UPCASE(MEMNAME), 'TB3099_CBR_ENTR_D') > 0 OR
-        INDEX(UPCASE(MEMNAME), 'TB3012_CBR_LIQ_DESC_D') > 0 OR
-        INDEX(UPCASE(MEMNAME), 'TB5010_OR_CODE_LIQ_D') > 0 OR
-        INDEX(UPCASE(MEMNAME), 'TBL_920_PIX_EVENTOS_CAD_202312') > 0 OR
-        INDEX(UPCASE(MEMNAME), 'TBL_801_LIQUIDACAO_CIP_202312') > 0 OR
-        INDEX(UPCASE(MEMNAME), 'TBL_606_REDE_FLEX_202312') > 0 OR
-        INDEX(UPCASE(MEMNAME), 'TBL_602_REDE_RAV_202312') > 0 OR
-        INDEX(UPCASE(MEMNAME), 'TBL_901_FLUXO_PAG_202312') > 0
-    )
+AND (
+    /* As funções INDEX e UPCASE precisam ser usadas corretamente */
+    INDEX(UPCASE(MEMNAME), 'TB3099_CBR_ENTR_D') > 0 OR
+    INDEX(UPCASE(MEMNAME), 'TB3012_CBR_LIQ_DESC_D') > 0 OR
+    INDEX(UPCASE(MEMNAME), 'TB5010_OR_CODE_LIQ_D') > 0 OR
+    INDEX(UPCASE(MEMNAME), 'TBL_920_PIX_EVENTOS_CAD_202312') > 0 OR
+    INDEX(UPCASE(MEMNAME), 'TBL_801_LIQUIDACAO_CIP_202312') > 0 OR
+    INDEX(UPCASE(MEMNAME), 'TBL_606_REDE_FLEX_202312') > 0 OR
+    INDEX(UPCASE(MEMNAME), 'TBL_602_REDE_RAV_202312') > 0 OR
+    INDEX(UPCASE(MEMNAME), 'TBL_901_FLUXO_PAG_202312') > 0
+)
 ORDER BY MEMNAME;
 QUIT;
-"""
-
-# Execute o código SAS
-result = sas.submit(sas_code)
-
-# O resultado será um dicionário. A chave 'LOG' contém o log do SAS
-print(result['LOG'])
-
-# Encerra a sessão SAS
-sas.endsas()
