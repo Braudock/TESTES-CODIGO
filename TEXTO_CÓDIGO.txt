@@ -2,17 +2,18 @@ import pandas as pd
 import glob
 
 # Caminho do diretório onde os arquivos estão localizados
-caminho_diretorio = 'C:/caminho/para/o/diretorio/'
+caminho_diretorio = '/caminho/para/o/diretorio/'
 
 # Lista dos identificadores dos arquivos
 ids_arquivos = [8021, 8023, 8026, 8028, 8029, 8030, 8031, 8032]
 
 # Criar um arquivo Excel no mesmo diretório
-caminho_arquivo_excel = caminho_diretorio + 'consolidado.xlsx'
+caminho_arquivo_excel = f'{caminho_diretorio}consolidado.xlsx'
 with pd.ExcelWriter(caminho_arquivo_excel) as writer:
     for id_arquivo in ids_arquivos:
         # Encontrar todos os arquivos que correspondem ao padrão no diretório especificado
-        arquivos = glob.glob(f'{caminho_diretorio}*{id_arquivo}*.txt')
+        padrao_busca = f'{caminho_diretorio}ESP_VP_ESP_{id_arquivo}_P2_*.txt'
+        arquivos = glob.glob(padrao_busca)
 
         # Verificar se existem arquivos para processar
         if not arquivos:
@@ -24,7 +25,7 @@ with pd.ExcelWriter(caminho_arquivo_excel) as writer:
         for arquivo in arquivos:
             try:
                 # Lendo o conteúdo do arquivo
-                with open(arquivo, 'r') as file:
+                with open(arquivo, 'r', encoding='utf-8') as file:
                     df = pd.read_csv(file, header=None, names=['Conteúdo'])
                     df_total = pd.concat([df_total, df], ignore_index=True)
             except Exception as e:
