@@ -33,3 +33,6 @@ with pd.ExcelWriter(caminho_arquivo_excel) as writer:
 
         # Escrever o DataFrame em uma aba separada
         df_total.to_excel(writer, sheet_name=str(id_arquivo), index=False)
+
+# Informar que o processo foi concluído
+print(f"Consolidação dos arquivos de texto em Excel concluída com sucesso no caminho: {caminho_arquivo_excel}")
