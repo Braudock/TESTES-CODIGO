@@ -7,18 +7,28 @@ caminho_diretorio = 'C:/caminho/para/o/diretorio/'
 # Lista dos identificadores dos arquivos
 ids_arquivos = [8021, 8023, 8026, 8028, 8029, 8030, 8031, 8032]
 
-# Criar um arquivo Excel
-with pd.ExcelWriter('consolidado.xlsx') as writer:
+# Criar um arquivo Excel no mesmo diretório
+caminho_arquivo_excel = caminho_diretorio + 'consolidado.xlsx'
+with pd.ExcelWriter(caminho_arquivo_excel) as writer:
     for id_arquivo in ids_arquivos:
         # Encontrar todos os arquivos que correspondem ao padrão no diretório especificado
         arquivos = glob.glob(f'{caminho_diretorio}*{id_arquivo}*.txt')
 
+        # Verificar se existem arquivos para processar
+        if not arquivos:
+            print(f"Nenhum arquivo encontrado para o ID {id_arquivo}.")
+            continue
+
         # Consolidar os arquivos em um único DataFrame
         df_total = pd.DataFrame()
         for arquivo in arquivos:
-            with open(arquivo, 'r') as file:
-                df = pd.read_csv(file, header=None, names=['Conteúdo'])
-                df_total = df_total.append(df)
+            try:
+                # Lendo o conteúdo do arquivo
+                with open(arquivo, 'r') as file:
+                    df = pd.read_csv(file, header=None, names=['Conteúdo'])
+                    df_total = pd.concat([df_total, df], ignore_index=True)
+            except Exception as e:
+                print(f"Erro ao ler o arquivo {arquivo}: {e}")
 
         # Escrever o DataFrame em uma aba separada
         df_total.to_excel(writer, sheet_name=str(id_arquivo), index=False)
