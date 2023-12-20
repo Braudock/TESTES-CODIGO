@@ -1,55 +1,24 @@
-import saspy
+import pandas as pd
+import glob
 
-# Configuração da conexão SAS. Substitua 'your_config_name' pelo nome da configuração que corresponde
-# à sua configuração no arquivo sascfg_personal.py.
-sas = saspy.SASsession(cfgname='your_config_name')
+# Caminho do diretório onde os arquivos estão localizados
+caminho_diretorio = 'C:/caminho/para/o/diretorio/'
 
-# Verifique se a sessão SAS foi iniciada corretamente
-if sas:
-  print('Conexão SAS estabelecida.')
-else:
-  print('Falha ao estabelecer conexão SAS.')
-  # Finalize aqui se a conexão falhar
-  exit()
+# Lista dos identificadores dos arquivos
+ids_arquivos = [8021, 8023, 8026, 8028, 8029, 8030, 8031, 8032]
 
-# Atribuir as bibliotecas OUTCOB e INFOP3. Substitua os caminhos fictícios pelos caminhos reais em seu ambiente.
-sas.saslib('OUTCOB', path='caminho/para/OUTCOB')
-sas.saslib('INFOP3', path='caminho/para/INFOP3')
+# Criar um arquivo Excel
+with pd.ExcelWriter('consolidado.xlsx') as writer:
+    for id_arquivo in ids_arquivos:
+        # Encontrar todos os arquivos que correspondem ao padrão no diretório especificado
+        arquivos = glob.glob(f'{caminho_diretorio}*{id_arquivo}*.txt')
 
-# O código SAS a ser executado
-sas_code = """
-PROC SQL;
-CREATE TABLE ALL_DATASETS AS 
-SELECT 
-  MEMNAME AS NOME_DA_BASE,
-  CRDATE AS DATA_ATUALIZACAO,
-  NOBS AS NUMERO_DE_LINHAS,
-  FILESIZE/1000 AS TAMANHO_FORMAT,
-  CASE 
-    WHEN NOBS = 0 THEN 'S/INFO'
-    ELSE 'C/INFO'
-  END AS STATUS_BASE
-FROM DICTIONARY.TABLES
-WHERE LIBNAME IN ('OUTCOB', 'INFOP3')
-AND (
-  INDEX(UPCASE(MEMNAME),'TBL_801_LIQUIDACAO_CIP_202312') > 0 OR
-  INDEX(UPCASE(MEMNAME),'TB3099_CBR_ENTR_D') > 0 OR
-  INDEX(UPCASE(MEMNAME),'TB3012_CBR_LIQ_DESC_D') > 0 OR
-  INDEX(UPCASE(MEMNAME),'TB5010_OR_CODE_LIQ_D') > 0 OR
-  INDEX(UPCASE(MEMNAME),'TBL_920_PIX_EVENTOS_CAD_202312') > 0 OR
-  INDEX(UPCASE(MEMNAME),'TBL_606_REDE_FLEX_202312') > 0 OR
-  INDEX(UPCASE(MEMNAME),'TBL_602_REDE_RAV_202312') > 0 OR
-  INDEX(UPCASE(MEMNAME),'TBL_901_FLUXO_PAG_202312') > 0
-)
-ORDER BY MEMNAME;
-QUIT;
-"""
+        # Consolidar os arquivos em um único DataFrame
+        df_total = pd.DataFrame()
+        for arquivo in arquivos:
+            with open(arquivo, 'r') as file:
+                df = pd.read_csv(file, header=None, names=['Conteúdo'])
+                df_total = df_total.append(df)
 
-# Execute o código SAS
-result = sas.submit(sas_code)
-
-# Verifique o log para quaisquer erros ou mensagens
-print(result['LOG'])
-
-# Finalize a sessão SAS quando terminar
-sas.endsas()
+        # Escrever o DataFrame em uma aba separada
+        df_total.to_excel(writer, sheet_name=str(id_arquivo), index=False)
