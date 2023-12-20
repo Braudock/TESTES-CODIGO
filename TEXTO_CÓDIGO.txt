@@ -1,5 +1,6 @@
 import pandas as pd
 import glob
+import csv
 
 # Caminho do diretório onde os arquivos estão localizados
 caminho_diretorio = '/caminho/para/o/diretorio/'
@@ -24,9 +25,11 @@ with pd.ExcelWriter(caminho_arquivo_excel) as writer:
         df_total = pd.DataFrame()
         for arquivo in arquivos:
             try:
-                # Lendo o conteúdo do arquivo
+                # Tentar detectar o delimitador automaticamente
                 with open(arquivo, 'r', encoding='utf-8') as file:
-                    df = pd.read_csv(file, header=None, names=['Conteúdo'])
+                    delimiter = csv.Sniffer().sniff(file.readline()).delimiter
+                    file.seek(0)  # Voltar ao início do arquivo
+                    df = pd.read_csv(file, delimiter=delimiter)
                     df_total = pd.concat([df_total, df], ignore_index=True)
             except Exception as e:
                 print(f"Erro ao ler o arquivo {arquivo}: {e}")
