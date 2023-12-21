@@ -1,41 +1,25 @@
-import pandas as pd
-import glob
-import csv
+Boa tarde, Lê,
 
-# Caminho do diretório onde os arquivos estão localizados
-caminho_diretorio = '/caminho/para/o/diretorio/'
+Espero que esteja tudo bem.
 
-# Lista dos identificadores dos arquivos
-ids_arquivos = [8021, 8023, 8026, 8028, 8029, 8030, 8031, 8032]
+Recebemos uma indagação da Coordenadora Gabriela Saeko sobre o ajuste na meta do Especialista Willian Renato. Gostaria de alinhar contigo a resposta para assegurarmos transparência e precisão na nossa comunicação.
 
-# Criar um arquivo Excel no mesmo diretório
-caminho_arquivo_excel = f'{caminho_diretorio}consolidado.xlsx'
-with pd.ExcelWriter(caminho_arquivo_excel) as writer:
-    for id_arquivo in ids_arquivos:
-        # Encontrar todos os arquivos que correspondem ao padrão no diretório especificado
-        padrao_busca = f'{caminho_diretorio}ESP_VP_ESP_{id_arquivo}_P2_*.txt'
-        arquivos = glob.glob(padrao_busca)
+Minha proposta para o e-mail de resposta é a seguinte:
 
-        # Verificar se existem arquivos para processar
-        if not arquivos:
-            print(f"Nenhum arquivo encontrado para o ID {id_arquivo}.")
-            continue
+Boa tarde, Gabriela,
 
-        # Consolidar os arquivos em um único DataFrame
-        df_total = pd.DataFrame()
-        for arquivo in arquivos:
-            try:
-                # Tentar detectar o delimitador automaticamente
-                with open(arquivo, 'r', encoding='utf-8') as file:
-                    delimiter = csv.Sniffer().sniff(file.readline()).delimiter
-                    file.seek(0)  # Voltar ao início do arquivo
-                    df = pd.read_csv(file, delimiter=delimiter)
-                    df_total = pd.concat([df_total, df], ignore_index=True)
-            except Exception as e:
-                print(f"Erro ao ler o arquivo {arquivo}: {e}")
+Espero que esteja tendo um excelente dia.
 
-        # Escrever o DataFrame em uma aba separada
-        df_total.to_excel(writer, sheet_name=str(id_arquivo), index=False)
+Agradeço seu contato e compreendo a preocupação em relação ao ajuste na meta do Especialista Willian Renato. O aumento observado reflete tanto o desempenho passado quanto uma revisão estratégica das expectativas para o 4º trimestre de 2023. A meta inicial foi recalculada para garantir que esteja alinhada com as projeções atualizadas e com o crescimento esperado, baseado tanto em resultados anteriores quanto em objetivos futuros.
 
-# Informar que o processo foi concluído
-print(f"Consolidação dos arquivos de texto em Excel concluída com sucesso no caminho: {caminho_arquivo_excel}")
+Estamos abertos a discutir esse processo mais a fundo e fornecer mais detalhes, se necessário.
+
+Atenciosamente,
+
+[Seu Nome]
+
+Lê, essa mensagem procura esclarecer a situação, reconhecendo o histórico de desempenho e a necessidade de ajustes estratégicos. Por favor, me avise se essa abordagem está alinhada com as nossas intenções ou se há algo mais que deveríamos acrescentar.
+
+Cordialmente,
+
+[Seu Nome]
