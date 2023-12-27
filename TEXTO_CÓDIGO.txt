@@ -7,3 +7,12 @@ data seu_dataset_formatado;
     /* Formatar a Coluna_7 para ter 7 dígitos, preenchendo com zeros à esquerda */
     Coluna_7 = put(Coluna_7, z7.);
 run;
+
+
+proc sql;
+    create table seu_dataset_formatado as
+    select 
+        put(Coluna_4, z4.) as Coluna_4,
+        put(Coluna_7, z7.) as Coluna_7
+    from seu_dataset_original;
+quit;
