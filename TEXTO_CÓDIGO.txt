@@ -1,6 +1,8 @@
-proc sql;
-   update tabela_original
-   set campo1 = (select campo1 from tabela_atualizacao where tabela_original.chave = tabela_atualizacao.chave),
-       campo2 = (select campo2 from tabela_atualizacao where tabela_original.chave = tabela_atualizacao.chave)
-   where exists (select * from tabela_atualizacao where tabela_original.chave = tabela_atualizacao.chave);
-quit;
+data nova_tabela;
+    set tabela_exemplo;
+    select;
+        when (condicao1) nova_coluna = 'Resultado1';
+        when (condicao2) nova_coluna = 'Resultado2';
+        otherwise nova_coluna = 'OutroResultado';
+    end;
+run;
