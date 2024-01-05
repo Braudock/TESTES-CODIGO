@@ -1,8 +1,10 @@
-data nova_tabela;
-    set tabela_exemplo;
-    select;
-        when (condicao1) nova_coluna = 'Resultado1';
-        when (condicao2) nova_coluna = 'Resultado2';
-        otherwise nova_coluna = 'OutroResultado';
-    end;
-run;
+proc sql;
+    create table tabela_classificada as
+    select idade,
+           case 
+               when idade < 18 then 'Menor de idade'
+               when idade between 18 and 64 then 'Adulto'
+               else 'Idoso'
+           end as categoria_idade
+    from tabela_exemplo;
+quit;
