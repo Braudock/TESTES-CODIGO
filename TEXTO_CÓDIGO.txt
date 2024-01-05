@@ -1,1 +1,6 @@
-Victor se destaca na ajuda aos colegas, focando em melhorias contínuas e assumindo responsabilidades com entusiasmo. Ele é proativo em aprender e antecipar problemas, promovendo um ambiente colaborativo. Com habilidade em comunicação clara, Victor resolve problemas complexos de forma eficiente, explicando claramente suas soluções.
+proc sql;
+   update tabela_original
+   set campo1 = (select campo1 from tabela_atualizacao where tabela_original.chave = tabela_atualizacao.chave),
+       campo2 = (select campo2 from tabela_atualizacao where tabela_original.chave = tabela_atualizacao.chave)
+   where exists (select * from tabela_atualizacao where tabela_original.chave = tabela_atualizacao.chave);
+quit;
