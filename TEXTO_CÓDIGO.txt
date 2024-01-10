@@ -1,10 +1,1 @@
-proc sql;
-    create table tabela_classificada as
-    select idade,
-           case 
-               when idade < 18 then 'Menor de idade'
-               when idade between 18 and 64 then 'Adulto'
-               else 'Idoso'
-           end as categoria_idade
-    from tabela_exemplo;
-quit;
+"A atualização das metas referentes a dezembro foi concluída. O período para contestações permanecerá aberto por um prazo de 3 dias."
