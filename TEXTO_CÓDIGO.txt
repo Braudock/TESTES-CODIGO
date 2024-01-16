@@ -1,1 +1,10 @@
-"A atualização das metas referentes a dezembro foi concluída. O período para contestações permanecerá aberto por um prazo de 3 dias."
+proc sql;
+   create table resultado as
+   select a.chave, 
+          sum(coalesce(a.valor, 0) + coalesce(b.valor_adicional, 0)) as soma_total
+   from base1 as a
+   left join base2 as b
+   on a.chave = b.chave
+   group by a.chave
+   ;
+quit;
