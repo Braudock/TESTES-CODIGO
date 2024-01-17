@@ -1,1 +1,1 @@
-
+Conforme evidenciado no anexo, observa-se uma diminuição na meta REFRESH_DEZ em comparação com a meta REFRESH_NOV. Esta redução é atribuída principalmente à migração planejada, mas não realizada, de certos CNPJs, como exemplificado pelos números  e . Esses CNPJs estavam inicialmente previstos para serem transferidos no cadastro futuro de dezembro de 2023 (202312), contudo, essa migração não ocorreu. Como resultado, os CNPJs  e  foram reincorporados à meta de suas carteiras originais, restabelecendo assim os níveis observados em REFRESH_NOV.
