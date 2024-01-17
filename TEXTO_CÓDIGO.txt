@@ -1,10 +1,11 @@
-proc sql;
-   create table resultado as
-   select a.chave, 
-          sum(coalesce(a.valor, 0) + coalesce(b.valor_adicional, 0)) as soma_total
-   from base1 as a
-   left join base2 as b
-   on a.chave = b.chave
-   group by a.chave
-   ;
-quit;
+Boa tarde, Marta,
+
+Em resposta ao seu questionamento sobre as alterações nas metas, gostaria de esclarecer que estas mudanças ocorreram devido à migração de alguns CNPJs no cadastro futuro em dezembro de 2023 (202312), e seu posterior retorno no fechamento do mesmo período.
+
+No primeiro anexo, você encontrará a evolução detalhada das metas, demonstrando como estas foram impactadas pelas movimentações dos CNPJs durante esse período.
+
+No segundo anexo, apresento um exemplo concreto de dois CNPJs específicos que passaram por esse processo de migração e retorno, e como isso influenciou diretamente as metas estabelecidas para o fechamento de dezembro de 2023 (202312).
+
+Espero que essas informações ajudem a esclarecer como as mudanças nos CNPJs impactaram as metas. Estou à disposição para quaisquer esclarecimentos adicionais.
+
+Atenciosamente,"
