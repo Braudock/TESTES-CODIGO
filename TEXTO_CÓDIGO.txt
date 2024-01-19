@@ -1,13 +1,18 @@
 proc sql;
-   select a.id,
-          a.valor as valor_atual,
-          coalesce(b.valor, 'Sem correspondência na base anterior') as valor_anterior,
-          case 
-              when a.valor = b.valor then 'Igual'
-              when b.valor is null then 'Não encontrado na base anterior'
-              else 'Diferente'
-          end as status
-   from tabela_atual as a
-   left join tabela_anterior as b
-   on a.id = b.id;
+   select *
+   from (
+       select a.id,
+              a.valor as valor_atual,
+              coalesce(b.valor, 'Sem correspondência na base anterior') as valor_anterior,
+              case 
+                  when a.valor = b.valor then 'Igual'
+                  when b.valor is null then 'Não encontrado na base anterior'
+                  else 'Diferente'
+              end as status
+       from tabela_atual as a
+       left join tabela_anterior as b
+       on a.id = b.id
+   ) as sub
+   where sub.status = 'Diferente';
 quit;
+
