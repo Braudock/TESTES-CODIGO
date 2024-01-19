@@ -1,15 +1,18 @@
 PROC SQL;
-    SELECT
-        coluna,
-        Contagem
-    FROM
-        (SELECT
-             coluna,
-             COUNT(*) AS Contagem
-         FROM
-             tabela
-         GROUP BY
-             coluna
-        ) AS subconsulta
-    WHERE Contagem > N; /* Substitua N pelo número que deseja filtrar */
-QUIT;
+SELECT
+    A.SEGMENTO,
+    A.NOME_ESPEC,
+    A.FUNC_ESPEC,
+    A.RACF_ESPEC,
+    COUNT(A.SEGMENTO) AS QTD_SEGTO
+FROM
+    VALIDA_SEGMENTO AS A
+GROUP BY
+    A.SEGMENTO,
+    A.NOME_ESPEC,
+    A.FUNC_ESPEC,
+    A.RACF_ESPEC
+HAVING
+    COUNT(A.SEGMENTO) > 1
+;
+RUN;
