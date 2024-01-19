@@ -1,18 +1,18 @@
-proc sql;
-   select *
-   from (
-       select a.id,
-              a.valor as valor_atual,
-              coalesce(b.valor, 'Sem correspondência na base anterior') as valor_anterior,
-              case 
-                  when a.valor = b.valor then 'Igual'
-                  when b.valor is null then 'Não encontrado na base anterior'
-                  else 'Diferente'
-              end as status
-       from tabela_atual as a
-       left join tabela_anterior as b
-       on a.id = b.id
-   ) as sub
-   where sub.status = 'Diferente';
-quit;
-
+PROC SQL;
+SELECT
+    A.SEGMENTO,
+    A.NOME_ESPEC,
+    A.FUNC_ESPEC,
+    A.RACF_ESPEC,
+    COUNT(A.SEGMENTO) AS QTD_SEGTO
+FROM
+    VALIDA_SEGMENTO AS A
+GROUP BY
+    A.SEGMENTO,
+    A.NOME_ESPEC,
+    A.FUNC_ESPEC,
+    A.RACF_ESPEC
+HAVING
+    COUNT(A.SEGMENTO) > 1
+;
+RUN;
