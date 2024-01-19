@@ -1,18 +1,11 @@
-PROC SQL;
-SELECT
-    NOME_ESPEC,
-    FUNC_ESPEC,
-    RACF_ESPEC,
-    SEGMENTO,
-    COUNT(RACF_ESPEC) AS QTD_RACF
-FROM
-    VALIDA_SEGMENTO AS V
-WHERE
-    QTD_SEGTO > 1
-GROUP BY
-    NOME_ESPEC,
-    FUNC_ESPEC,
-    RACF_ESPEC,
-    SEGMENTO
-;
-RUN;
+proc sort data=seus_dados out=seus_dados_sorted;
+  by sua_coluna;
+run;
+
+proc sql;
+  create table dados_duplicados as
+  select *
+  from seus_dados_sorted
+  group by sua_coluna
+  having count(*) > 1;
+quit;
