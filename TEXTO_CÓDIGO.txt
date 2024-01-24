@@ -1,11 +1,1 @@
-proc sort data=seus_dados out=seus_dados_sorted;
-  by sua_coluna;
-run;
-
-proc sql;
-  create table dados_duplicados as
-  select *
-  from seus_dados_sorted
-  group by sua_coluna
-  having count(*) > 1;
-quit;
+Analista de Planejamento Empresarial Pleno com mais de 5 anos de experiência, especializei-me emmodelagem e análise de dados. Destaco-me na criação de KPIs, automação de processos usando SAS,Python e VBA, e na transformação de dados em insights estratégicos. Minha expertise em otimizaçãooperacional e estratégica tem sido fundamental em ambientes dinâmicos e exigentes.
