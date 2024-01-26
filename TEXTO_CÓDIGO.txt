@@ -1,1 +1,17 @@
-Analista de Planejamento Empresarial Pleno com mais de 5 anos de experiência, especializei-me emmodelagem e análise de dados. Destaco-me na criação de KPIs, automação de processos usando SAS,Python e VBA, e na transformação de dados em insights estratégicos. Minha expertise em otimizaçãooperacional e estratégica tem sido fundamental em ambientes dinâmicos e exigentes.
+%macro load_and_tag_datasets(libname);
+
+    %do i = 1 %to 12;
+        %let month = %sysfunc(putn(&i, z2.));
+        %let dataset_name = E2023&month;
+
+        %if %sysfunc(exist(&libname..&dataset_name)) %then %do;
+            data &libname..&dataset_name;
+                set &libname..&dataset_name;
+                ANOMES = "2023&month";
+            run;
+        %end;
+    %end;
+
+%mend load_and_tag_datasets;
+
+%load_and_tag_datasets(libname=YourLibName);
