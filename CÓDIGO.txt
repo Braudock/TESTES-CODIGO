@@ -2,53 +2,42 @@ import os
 import datetime
 import pandas as pd
 
-def encontrar_ultimos_arquivos(caminho_pasta, codigos):
-    arquivos_encontrados = []
+def encontrar_ultimo_arquivo(caminho_pasta, codigos, caminho_excel):
+    resultados = []
 
-    for raiz, dirs, arquivos in os.walk(caminho_pasta):
-        for arquivo in arquivos:
-            if arquivo.endswith('.txt') and any(codigo in arquivo for codigo in codigos):
-                try:
-                    data_arquivo = datetime.datetime.strptime(arquivo[-12:-4], '%Y%m%d')
-                    caminho_completo = os.path.join(raiz, arquivo)
-                    data_modificacao = datetime.datetime.fromtimestamp(os.path.getmtime(caminho_completo))
+    for codigo in codigos:
+        ultimo_arquivo = None
+        ultima_data = None
+        ultima_modificacao = None
 
-                    arquivos_encontrados.append((caminho_completo, data_arquivo, data_modificacao))
-                except ValueError:
-                    # Ignorar arquivos que não estejam no formato esperado
-                    continue
+        for raiz, dirs, arquivos in os.walk(caminho_pasta):
+            for arquivo in arquivos:
+                if arquivo.endswith('.txt') and any(codigo in arquivo for codigo in codigos):
+                    try:
+                        data_arquivo = datetime.datetime.strptime(arquivo[-12:-4], '%Y%m%d')
+                        caminho_completo = os.path.join(raiz, arquivo)
+                        data_modificacao = datetime.datetime.fromtimestamp(os.path.getmtime(caminho_completo))
 
-    # Filtrar para manter apenas os mais recentes de cada código
-    arquivos_finais = {}
-    for arquivo, data_arquivo, data_modificacao in arquivos_encontrados:
-        codigo = next(codigo for codigo in codigos if codigo in arquivo)
-        if codigo not in arquivos_finais or (data_arquivo > arquivos_finais[codigo][1]) or (data_arquivo == arquivos_finais[codigo][1] and data_modificacao > arquivos_finais[codigo][2]):
-            arquivos_finais[codigo] = (arquivo, data_arquivo, data_modificacao)
+                        if ultimo_arquivo is None or (data_arquivo > ultima_data) or (data_arquivo == ultima_data and data_modificacao > ultima_modificacao):
+                            ultimo_arquivo = caminho_completo
+                            ultima_data = data_arquivo
+                            ultima_modificacao = data_modificacao
+                    except ValueError:
+                        continue
 
-    return arquivos_finais
+        if ultimo_arquivo:
+            resultados.append((codigo, ultimo_arquivo, ultima_modificacao))
+
+    if resultados:
+        df = pd.DataFrame(resultados, columns=['Código', 'Nome do Arquivo', 'Última Modificação'])
+        df.to_excel(caminho_excel, index=False)
+        print(f"Resultado salvo em: {caminho_excel}")
+    else:
+        print("Nenhum arquivo encontrado.")
 
 # Caminho para a pasta onde a busca será realizada
 caminho_pasta = '/caminho/para/a/pasta'
-codigos = ['codigo1', 'codigo2', 'codigo3']  # Lista de códigos para procurar
+codigos = ['codigo1', 'codigo2', 'codigo3']  # Lista de códigos a serem buscados
+caminho_excel = '/caminho/para/salvar/resultado.xlsx'  # Caminho completo para o arquivo Excel
 
-arquivos_finais = encontrar_ultimos_arquivos(caminho_pasta, codigos)
-
-dados = {
-    'Código': [],
-    'Nome do Arquivo': [],
-    'Data do Arquivo': [],
-    'Última Modificação': []
-}
-
-for codigo, (arquivo, data_arquivo, ultima_modificacao) in arquivos_finais.items():
-    dados['Código'].append(codigo)
-    dados['Nome do Arquivo'].append(arquivo)
-    dados['Data do Arquivo'].append(data_arquivo)
-    dados['Última Modificação'].append(ultima_modificacao)
-
-if dados['Código']:
-    df = pd.DataFrame(dados)
-    df.to_excel('resultados.xlsx', index=False)
-    print(f"Arquivos encontrados: {len(dados['Código'])}")
-else:
-    print("Nenhum arquivo encontrado.")
+encontrar_ultimo_arquivo(caminho_pasta, codigos, caminho_excel)
