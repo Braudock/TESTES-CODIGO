@@ -2,35 +2,52 @@ import os
 import pandas as pd
 from datetime import datetime, timedelta
 
-def encontrar_arquivos(pasta, codigo):
-    data_ontem = (datetime.now() - timedelta(days=1)).strftime('%Y%m%d')
-    arquivos_encontrados = []
-    for raiz, diretorios, arquivos in os.walk(pasta):
+def encontrar_arquivos_recentes(pasta_raiz):
+    arquivos_recentes = {}  # Dicionário para armazenar o arquivo mais recente por código
+
+    for raiz, dirs, arquivos in os.walk(pasta_raiz):
         for arquivo in arquivos:
-            if arquivo.endswith('.txt') and codigo in arquivo and data_ontem in arquivo:
-                caminho_completo = os.path.join(raiz, arquivo)
-                ultima_modificacao = datetime.fromtimestamp(os.path.getmtime(caminho_completo)).strftime('%Y-%m-%d %H:%M:%S')
-                arquivos_encontrados.append((arquivo, ultima_modificacao))
+            if arquivo.endswith('.txt'):
+                partes = arquivo.split('_')
+                if len(partes) >= 4:
+                    codigo = '_'.join(partes[:3])
+                    data_str = partes[3].split('.')[0]  # Remover a extensão .txt
+                    try:
+                        data_arquivo = datetime.strptime(data_str, '%Y%m%d')
+                        caminho_completo = os.path.join(raiz, arquivo)
 
-    if not arquivos_encontrados:
-        return None
-    
-    # Ordenar por data de modificação, do mais recente ao mais antigo
-    arquivos_encontrados.sort(key=lambda x: x[1], reverse=True)
-    return arquivos_encontrados[0]
+                        # Verificar a data de modificação do arquivo
+                        data_modificacao = datetime.fromtimestamp(os.path.getmtime(caminho_completo))
+                        hoje = datetime.now()
+                        dia_semana = hoje.weekday()  # 0 é segunda-feira, 6 é domingo
 
-def salvar_em_excel(dados, caminho_excel):
-    df = pd.DataFrame([dados], columns=['Nome do Arquivo', 'Última Modificação'])
+                        # Ajuste para segunda-feira (dia_semana == 0), considerando arquivos de sexta-feira (diferença de 3 dias)
+                        diferenca_dias = 3 if dia_semana == 0 else 1
+
+                        # Calcular a diferença em dias entre hoje e a data de modificação
+                        diferenca = (hoje.date() - data_modificacao.date()).days
+
+                        # Considerar apenas arquivos modificados em D-1 ou, se for segunda-feira, em D-3 (sexta-feira)
+                        if diferenca == diferenca_dias:
+                            if codigo not in arquivos_recentes or data_arquivo > arquivos_recentes[codigo]['data']:
+                                arquivos_recentes[codigo] = {'nome': arquivo, 'data': data_arquivo}
+                    except ValueError:
+                        pass  # Ignorar arquivos que não seguem o padrão esperado
+
+    return arquivos_recentes
+
+def salvar_em_excel(arquivos, caminho_excel):
+    df = pd.DataFrame.from_dict(arquivos, orient='index', columns=['nome', 'data'])
+    df.reset_index(inplace=True)
+    df.rename(columns={'index': 'código'}, inplace=True)
     df.to_excel(caminho_excel, index=False)
 
-if __name__ == "__main__":
-    pasta = input("Digite o caminho da pasta: ")
-    codigo = input("Digite o código a ser procurado: ")
-    caminho_excel = input("Digite o caminho completo para salvar o arquivo Excel: ")
+# Solicitar ao usuário os caminhos de entrada e saída
+pasta_raiz = input("Digite o caminho da pasta onde os arquivos serão procurados: ")
+caminho_excel = input("Digite o caminho onde o arquivo Excel será salvo: ")
 
-    resultado = encontrar_arquivos(pasta, codigo)
-    if resultado:
-        salvar_em_excel(resultado, caminho_excel)
-        print(f"Arquivo Excel salvo em {caminho_excel}")
-    else:
-        print("Nenhum arquivo correspondente encontrado.")
+# Encontrar os arquivos e salvar os resultados
+arquivos_recentes = encontrar_arquivos_recentes(pasta_raiz)
+salvar_em_excel(arquivos_recentes, caminho_excel)
+
+print("Processamento concluído. As informações foram salvas em:", caminho_excel)
