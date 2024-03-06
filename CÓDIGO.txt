@@ -1,36 +1,3 @@
-%let path = C:\caminho\para\sua\pasta;
+Bom dia, Tatiane e Edmilson,
 
-filename dirlist pipe "dir &path.\TP128.xlsx /T:W /O:-D /B";
-
-data _null_;
-  infile dirlist length=len;
-  input filename $varying32767. len;
-  call symputx('latest_file', filename);
-run;
-
-%put &latest_file.;
-
-proc import datafile="&path.\&latest_file."
-    out=work.imported_data
-    dbms=xlsx
-    replace;
-run;
-*********************************************************************************************************************************************************************
-
-data nova_tabela1;
-set tabela1;
-funcional_char = put(funcional, best.);
-run;
-
-data nova_tabela2;
-set tabela2;
-funcional_num = input(funcional, best.);
-run;
-
-proc sql;
-   create table tabela_final as
-   select a.*, b.*
-   from nova_tabela1 as a
-   full join nova_tabela2 as b
-   on a.racf = b.racf and a.funcional_char = b.funcional_char;
-quit;
+O aumento da meta ocorreu devido ao processo de Refresh de Metas que acontece todos os meses. Esse processo visa capturar CNPJs que migram para a plataforma durante o trimestre. O aumento da meta foi devido à entrada do CNPJ [número do CNPJ] para a plataforma O350, aumentando assim a meta para o especialista.
