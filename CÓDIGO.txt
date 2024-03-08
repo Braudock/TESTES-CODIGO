@@ -1,1 +1,7 @@
+proc sql;
+    create table nova_tabela as
+    select *, 
+           put(z4., z4.) as coluna_char
+    from tabela_original;
+quit;
 
