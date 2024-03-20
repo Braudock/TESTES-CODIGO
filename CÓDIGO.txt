@@ -1,7 +1,7 @@
-proc sql;
-    create table nova_tabela as
-    select *, 
-           put(z4., z4.) as coluna_char
-    from tabela_original;
-quit;
+import pandas as pd
 
+# Carregando o arquivo Excel
+df = pd.read_excel('caminho_do_seu_arquivo.xlsx')
+
+# Salvando como CSV
+df.to_csv('caminho_para_salvar_arquivo.csv', index=False)
