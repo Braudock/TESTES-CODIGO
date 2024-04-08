@@ -1,19 +1,19 @@
-Assunto: Solicitação de Atualização Urgente: TB127_SAN_COBRANCA_202404_PS23
+data sua_data;
+    /* Supondo que sua coluna de data seja uma string 'data_str' */
+    data_str = "08/04/2024";
+    
+    /* Converte a string para uma data SAS */
+    data_sas = input(data_str, ddmmmyy10.);
+    
+    /* Extrai o dia, mês e ano */
+    dia = day(data_sas);
+    mes = month(data_sas);
+    ano = year(data_sas);
+    
+    format data_sas date9.;
+    datalines;
+;
+run;
 
-Prezado Yago,
-
-Espero que esteja bem.
-
-Venho solicitar sua assistência para uma atualização crítica na base de dados TB127_SAN_COBRANCA_202404_PS23, mais especificamente na coluna 'Volume_cob_merc', que detalha o potencial de mercado do aqui. Observamos que a última atualização desta coluna data da versão TB127_SAN_COBRANCA_202402_PS23.
-
-A precisão e atualidade desses dados são vitais para a definição e ajuste de nossas metas, impactando significativamente nosso planejamento e ações estratégicas. A ausência dessa atualização tem limitado nossa capacidade de definir metas de maneira eficaz.
-
-Entendemos que pode haver desafios ou requisitos específicos para proceder com esta atualização e estamos totalmente abertos para colaborar ou discutir alternativas que facilitem esse processo.
-
-Agradecemos antecipadamente por sua compreensão e apoio. A atualização desses dados é fundamental para que possamos prosseguir com nossos objetivos estratégicos de forma eficiente.
-
-Poderia, por gentileza, nos informar sobre a viabilidade e o prazo estimado para a conclusão dessa atualização?
-
-Muito obrigado pela sua atenção e cooperação.
-
-Atenciosamente,
+proc print data=sua_data;
+run;
