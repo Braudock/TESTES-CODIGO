@@ -1,47 +1,31 @@
-import os
-from openpyxl import load_workbook
 
-def copiar_aba_excel(arquivo_origem, nome_aba, pasta_destino):
-    # Carrega o livro Excel de origem
-    wb_origem = load_workbook(arquivo_origem)
-    
-    # Verifica se a aba existe no livro
-    if nome_aba not in wb_origem.sheetnames:
-        print(f"A aba '{nome_aba}' não existe no arquivo.")
-        return
-    
-    # Copia a aba
+import openpyxl
+import os
+
+def copiar_aba_excel(arquivo_origem, arquivo_destino, nome_aba):
+    # Carregar o workbook original
+    wb_origem = openpyxl.load_workbook(arquivo_origem)
+    # Pegar a aba específica pelo nome
     aba_origem = wb_origem[nome_aba]
-    
-    # Cria um novo livro Excel
-    wb_destino = load_workbook()
-    # Cria uma nova aba no livro destino com o mesmo nome da aba origem
-    aba_destino = wb_destino.create_sheet(title=nome_aba)
-    
-    # Copia o conteúdo e formatação de cada célula da aba original para a aba destino
+
+    # Carregar ou criar o workbook destino
+    if os.path.exists(arquivo_destino):
+        wb_destino = openpyxl.load_workbook(arquivo_destino)
+    else:
+        wb_destino = openpyxl.Workbook()
+        wb_destino.remove(wb_destino.active)  # Remove a aba padrão criada automaticamente
+
+    # Criar uma nova aba no workbook destino com o nome do arquivo de origem
+    nome_nova_aba = os.path.splitext(os.path.basename(arquivo_origem))[0]
+    aba_destino = wb_destino.create_sheet(title=nome_nova_aba)
+
+    # Copiar o conteúdo da aba origem para a nova aba destino
     for row in aba_origem:
         for cell in row:
-            new_cell = aba_destino.cell(row=cell.row, column=cell.column, value=cell.value)
-            if cell.has_style:
-                new_cell.font = copy(cell.font)
-                new_cell.border = copy(cell.border)
-                new_cell.fill = copy(cell.fill)
-                new_cell.number_format = cell.number_format
-                new_cell.protection = copy(cell.protection)
-                new_cell.alignment = copy(cell.alignment)
+            aba_destino[cell.coordinate].value = cell.value
 
-    # Define o nome do novo arquivo Excel, incluindo o nome do arquivo original
-    nome_arquivo_destino = os.path.splitext(os.path.basename(arquivo_origem))[0] + '_copiado.xlsx'
-    caminho_completo = os.path.join(pasta_destino, nome_arquivo_destino)
-    
-    # Salva o novo livro Excel
-    wb_destino.save(caminho_completo)
-    wb_destino.close()
-    wb_origem.close()
-    
-    print(f"Aba '{nome_aba}' copiada para {caminho_completo} com sucesso.")
+    # Salvar o workbook destino
+    wb_destino.save(arquivo_destino)
 
-# Exemplo de uso
-arquivo_origem = 'caminho_para_seu_arquivo_original.xlsx'
-pasta_destino = 'caminho_para_pasta_destino'
-copiar_aba_excel(arquivo_origem, 'BASE_SAS', pasta_destino)
+# Exemplo de uso da função
+copiar_aba_excel('arquivo_origem.xlsx', 'arquivo_destino.xlsx', 'Aba1')
