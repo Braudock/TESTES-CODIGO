@@ -1,34 +1,47 @@
-import pandas as pd
+import os
+from openpyxl import load_workbook
 
-# Caminho para o arquivo Excel
-file_path = 'caminho_para_seu_arquivo.xlsx'
-sheet_name = 'nome_da_aba'  # Nome da aba que contém os dados
-new_sheet_name = 'Contagem'  # Nome da nova aba com as contagens
+def copiar_aba_excel(arquivo_origem, nome_aba, pasta_destino):
+    # Carrega o livro Excel de origem
+    wb_origem = load_workbook(arquivo_origem)
+    
+    # Verifica se a aba existe no livro
+    if nome_aba not in wb_origem.sheetnames:
+        print(f"A aba '{nome_aba}' não existe no arquivo.")
+        return
+    
+    # Copia a aba
+    aba_origem = wb_origem[nome_aba]
+    
+    # Cria um novo livro Excel
+    wb_destino = load_workbook()
+    # Cria uma nova aba no livro destino com o mesmo nome da aba origem
+    aba_destino = wb_destino.create_sheet(title=nome_aba)
+    
+    # Copia o conteúdo e formatação de cada célula da aba original para a aba destino
+    for row in aba_origem:
+        for cell in row:
+            new_cell = aba_destino.cell(row=cell.row, column=cell.column, value=cell.value)
+            if cell.has_style:
+                new_cell.font = copy(cell.font)
+                new_cell.border = copy(cell.border)
+                new_cell.fill = copy(cell.fill)
+                new_cell.number_format = cell.number_format
+                new_cell.protection = copy(cell.protection)
+                new_cell.alignment = copy(cell.alignment)
 
-# Lê a aba especificada do arquivo Excel
-df = pd.read_excel(file_path, sheet_name=sheet_name)
+    # Define o nome do novo arquivo Excel, incluindo o nome do arquivo original
+    nome_arquivo_destino = os.path.splitext(os.path.basename(arquivo_origem))[0] + '_copiado.xlsx'
+    caminho_completo = os.path.join(pasta_destino, nome_arquivo_destino)
+    
+    # Salva o novo livro Excel
+    wb_destino.save(caminho_completo)
+    wb_destino.close()
+    wb_origem.close()
+    
+    print(f"Aba '{nome_aba}' copiada para {caminho_completo} com sucesso.")
 
-# Escolha a coluna que você deseja contar as informações iguais
-column_name = 'nome_da_coluna'  # Nome da coluna a ser analisada
-
-# Conta as ocorrências únicas na coluna especificada
-ocorrencias = df[column_name].value_counts().reset_index()
-ocorrencias.columns = [column_name, 'Quantidade']  # Renomeia as colunas do DataFrame de contagem
-
-# Abre o arquivo Excel para escrita, mantendo o conteúdo existente
-with pd.ExcelWriter(file_path, engine='openpyxl', mode='a') as writer:
-    # Verifica se a aba onde os dados serão escritos já existe
-    try:
-        # Tenta carregar a aba existente
-        writer.book = load_workbook(file_path)
-        # Se a aba existir, remove para evitar duplicação
-        if new_sheet_name in writer.book.sheetnames:
-            del writer.book[new_sheet_name]
-    except FileNotFoundError:
-        # Se o arquivo não existir, cria um novo
-        pass
-
-    # Escreve o DataFrame de contagem em uma nova aba no arquivo Excel
-    ocorrencias.to_excel(writer, sheet_name=new_sheet_name, index=False)
-
-print(f'Contagem de ocorrências adicionada na aba "{new_sheet_name}" do arquivo "{file_path}".')
+# Exemplo de uso
+arquivo_origem = 'caminho_para_seu_arquivo_original.xlsx'
+pasta_destino = 'caminho_para_pasta_destino'
+copiar_aba_excel(arquivo_origem, 'BASE_SAS', pasta_destino)
