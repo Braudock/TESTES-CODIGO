@@ -1,8 +1,11 @@
-
 import openpyxl
 import os
 
 def copiar_aba_excel(arquivo_origem, arquivo_destino, nome_aba):
+    # Garantir que o arquivo de destino tem a extensão correta
+    if not arquivo_destino.endswith('.xlsx'):
+        raise ValueError("O arquivo de destino deve ter a extensão .xlsx")
+
     # Carregar o workbook original
     wb_origem = openpyxl.load_workbook(arquivo_origem)
     # Pegar a aba específica pelo nome
