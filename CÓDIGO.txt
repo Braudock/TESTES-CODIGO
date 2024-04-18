@@ -1,34 +1,40 @@
-import openpyxl
-import os
+import pandas as pd
+import saspy
 
-def copiar_aba_excel(arquivo_origem, arquivo_destino, nome_aba):
-    # Garantir que o arquivo de destino tem a extensão correta
-    if not arquivo_destino.endswith('.xlsx'):
-        raise ValueError("O arquivo de destino deve ter a extensão .xlsx")
+# Configuração da sessão SAS
+def connect_to_sas():
+    try:
+        sas = saspy.SASsession(cfgname='sas_config')  # Substitua 'sas_config' pelo nome correto da sua configuração
+        print("SAS session established.")
+        return sas
+    except Exception as e:
+        print(f"Failed to establish SAS session: {e}")
+        return None
 
-    # Carregar o workbook original
-    wb_origem = openpyxl.load_workbook(arquivo_origem)
-    # Pegar a aba específica pelo nome
-    aba_origem = wb_origem[nome_aba]
+# Ler o arquivo Excel e transferir para o SAS
+def transfer_excel_to_sas(sas_session, filepath, sas_dataset_name, sas_libname):
+    try:
+        # Ler o arquivo Excel usando pandas
+        df = pd.read_excel(filepath)
+        print("Excel file read successfully.")
 
-    # Carregar ou criar o workbook destino
-    if os.path.exists(arquivo_destino):
-        wb_destino = openpyxl.load_workbook(arquivo_destino)
-    else:
-        wb_destino = openpyxl.Workbook()
-        wb_destino.remove(wb_destino.active)  # Remove a aba padrão criada automaticamente
+        # Transferir DataFrame do pandas para uma base de dados SAS
+        sas_data = sas_session.df2sd(df, table=sas_dataset_name, libref=sas_libname)
+        print(f"Data transferred to SAS dataset '{sas_libname}.{sas_dataset_name}' successfully.")
+    except Exception as e:
+        print(f"Error during transfer to SAS: {e}")
 
-    # Criar uma nova aba no workbook destino com o nome do arquivo de origem
-    nome_nova_aba = os.path.splitext(os.path.basename(arquivo_origem))[0]
-    aba_destino = wb_destino.create_sheet(title=nome_nova_aba)
+# Configuração do usuário
+def main():
+    sas_session = connect_to_sas()
+    if sas_session:
+        filepath = 'caminho_para_seu_arquivo.xlsx'  # Substitua pelo caminho correto do seu arquivo Excel
+        sas_dataset_name = 'nome_base_sas'  # Substitua pelo nome desejado para a base de dados no SAS
+        sas_libname = 'mylib'  # Substitua pela libname configurada no seu ambiente SAS
 
-    # Copiar o conteúdo da aba origem para a nova aba destino
-    for row in aba_origem:
-        for cell in row:
-            aba_destino[cell.coordinate].value = cell.value
+ # Transferir dados para o SAS
+        transfer_excel_to_sas(sas_session, filepath, sas_dataset_name, sas_libname)
 
-    # Salvar o workbook destino
-    wb_destino.save(arquivo_destino)
-
-# Exemplo de uso da função
-copiar_aba_excel('arquivo_origem.xlsx', 'arquivo_destino.xlsx', 'Aba1')
+# Executar o script
+if __name__ == "__main__":
+    main()
