@@ -1,1 +1,1 @@
-=TEXT(FLOOR(A1*100, 5), "0") & "%-" & TEXT(FLOOR(A1*100, 5) + 5, "0") & "%"
+=TEXTO(ARRED.MULTB(A1*100; 5); "0") & "%-" & TEXTO(ARRED.MULTB(A1*100; 5) + 5; "0") & "%"
