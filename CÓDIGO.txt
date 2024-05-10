@@ -1,34 +1,23 @@
-import calendar
-import datetime
+import win32com.client
 
-def listar_compromissos(ano_inicio, mes_inicio, dia_inicio, ano_fim, mes_fim, dia_fim):
-    # Criar um objeto de calendário
-    cal = calendar.Calendar()
-    
-    # Gerar todas as datas no intervalo especificado
-    datas_intervalo = cal.itermonthdates(ano_inicio, mes_inicio)
-    
-    # Filtrar datas para o intervalo desejado
-    datas_filtradas = [data for data in datas_intervalo if datetime.date(ano_inicio, mes_inicio, dia_inicio) <= data <= datetime.date(ano_fim, mes_fim, dia_fim)]
-    
-    # Formatar as datas para exibição
-    datas_formatadas = [data.strftime("%Y-%m-%d") for data in datas_filtradas]
-    
-    # Retornar as datas
-    return datas_formatadas
+# Criar uma instância do Outlook
+outlook = win32com.client.Dispatch("Outlook.Application")
 
-# Definir o período desejado
-ano_inicio = 2024
-mes_inicio = 1
-dia_inicio = 1
-ano_fim = 2024
-mes_fim = 5
-dia_fim = 10
+# Acessar o calendário
+calendar = outlook.GetNamespace("MAPI").GetDefaultFolder(9)
 
-# Listar os compromissos no período especificado
-compromissos = listar_compromissos(ano_inicio, mes_inicio, dia_inicio, ano_fim, mes_fim, dia_fim)
+# Listar os compromissos
+appointments = calendar.Items
+appointments.IncludeRecurrences = True
+
+# Especificar o período desejado
+start_date = "2024-01-01"
+end_date = "2024-05-10"
+
+# Filtrar os compromissos pelo período
+filtered_appointments = appointments.Restrict("[Start] >= '" + start_date + "' AND [End] <= '" + end_date + "'")
 
 # Exibir os compromissos
 print("Compromissos no período de 01 de janeiro de 2024 até 10 de maio de 2024:")
-for compromisso in compromissos:
-    print(compromisso)
+for appointment in filtered_appointments:
+    print(f"Data: {appointment.Start}, Assunto: {appointment.Subject}")
