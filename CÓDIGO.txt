@@ -1,22 +1,15 @@
 import win32com.client
 
-# Criar uma instância do Outlook
 outlook = win32com.client.Dispatch("Outlook.Application")
+namespace = outlook.GetNamespace("MAPI")
+inbox = namespace.GetDefaultFolder(6)  # 6 corresponds to the Inbox folder
 
-# Acessar a caixa de entrada
-inbox = outlook.GetNamespace("MAPI").GetDefaultFolder(6)
+messages = inbox.Items
+messages.Sort("[ReceivedTime]", True)  # Sort by received time, descending
 
-# Listar os e-mails
-emails = inbox.Items
-
-# Especificar o período desejado
-start_date = "2024-01-01"
-end_date = "2024-05-10"
-
-# Filtrar os e-mails pelo período
-filtered_emails = emails.Restrict("[ReceivedTime] >= '" + start_date + "' AND [ReceivedTime] <= '" + end_date + "'")
-
-# Exibir os e-mails
-print("E-mails recebidos na caixa de entrada no período de 01 de janeiro de 2024 até 10 de maio de 2024:")
-for email in filtered_emails:
-    print(f"Assunto: {email.Subject}")
+for message in messages:
+    print("Subject:", message.Subject)
+    print("Received Time:", message.ReceivedTime)
+    print("Sender:", message.SenderName)
+    print("Body:", message.Body)
+    print("--------------------------")
