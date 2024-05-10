@@ -3,24 +3,20 @@ import win32com.client
 # Criar uma instância do Outlook
 outlook = win32com.client.Dispatch("Outlook.Application")
 
-# Acessar o calendário
-calendar = outlook.GetNamespace("MAPI").GetDefaultFolder(9)
+# Acessar a caixa de entrada
+inbox = outlook.GetNamespace("MAPI").GetDefaultFolder(6)
 
-# Listar os compromissos e reuniões
-items = calendar.Items
-items.IncludeRecurrences = True
+# Listar os e-mails
+emails = inbox.Items
 
 # Especificar o período desejado
 start_date = "2024-01-01"
 end_date = "2024-05-10"
 
-# Filtrar os compromissos e reuniões pelo período
-filtered_items = items.Restrict("[Start] >= '" + start_date + "' AND [End] <= '" + end_date + "'")
+# Filtrar os e-mails pelo período
+filtered_emails = emails.Restrict("[ReceivedTime] >= '" + start_date + "' AND [ReceivedTime] <= '" + end_date + "'")
 
-# Exibir os compromissos e reuniões
-print("Compromissos e reuniões no período de 01 de janeiro de 2024 até 10 de maio de 2024:")
-for item in filtered_items:
-    if item.Class == 26:  # 26 é o código para reuniões no Outlook
-        print(f"Data: {item.Start}, Assunto: {item.Subject} (Reunião)")
-    else:
-        print(f"Data: {item.Start}, Assunto: {item.Subject}")
+# Exibir os e-mails
+print("E-mails recebidos na caixa de entrada no período de 01 de janeiro de 2024 até 10 de maio de 2024:")
+for email in filtered_emails:
+    print(f"Assunto: {email.Subject}")
