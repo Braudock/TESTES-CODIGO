@@ -1,6 +1,25 @@
-=TEXTO(ARREDONDAR.PARA.BAIXO(A1*100; 5); "0") & "%-" & TEXTO(ARREDONDAR.PARA.BAIXO(A1*100; 5) + 5; "0") & "%"
+Sub FilterDataByPeriod()
 
+    ' Obter o período selecionado pelo usuário
+    Dim period As String
+    period = Range("A1").Value
 
-=TEXTO(ARREDONDAR.PARA.BAIXO((A1*100)/5; 0)*5; "0") & "%-" & TEXTO(ARREDONDAR.PARA.BAIXO((A1*100)/5; 0)*5 + 5; "0") & "%"
+    ' Filtrar os dados
+    Dim lastRow As Long
+    lastRow = Cells(Rows.Count, "A").End(xlUp).Row
 
+    For i = 2 To lastRow
+        Dim startDate As Date
+        startDate = Cells(i, "A").Value
 
+        Dim endDate As Date
+        endDate = Cells(i, "A").Value + Cells(i, "B").Value
+
+        If startDate >= StartDate Of period And endDate <= EndDate Of period Then
+            ' Exibir a linha
+        Else
+            ' Ocultar a linha
+        End If
+    Next i
+
+End Sub
