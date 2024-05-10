@@ -1,25 +1,34 @@
-Sub FilterDataByPeriod()
+import calendar
+import datetime
 
-    ' Obter o período selecionado pelo usuário
-    Dim period As String
-    period = Range("A1").Value
+def listar_compromissos(ano_inicio, mes_inicio, dia_inicio, ano_fim, mes_fim, dia_fim):
+    # Criar um objeto de calendário
+    cal = calendar.Calendar()
+    
+    # Gerar todas as datas no intervalo especificado
+    datas_intervalo = cal.itermonthdates(ano_inicio, mes_inicio)
+    
+    # Filtrar datas para o intervalo desejado
+    datas_filtradas = [data for data in datas_intervalo if datetime.date(ano_inicio, mes_inicio, dia_inicio) <= data <= datetime.date(ano_fim, mes_fim, dia_fim)]
+    
+    # Formatar as datas para exibição
+    datas_formatadas = [data.strftime("%Y-%m-%d") for data in datas_filtradas]
+    
+    # Retornar as datas
+    return datas_formatadas
 
-    ' Filtrar os dados
-    Dim lastRow As Long
-    lastRow = Cells(Rows.Count, "A").End(xlUp).Row
+# Definir o período desejado
+ano_inicio = 2024
+mes_inicio = 1
+dia_inicio = 1
+ano_fim = 2024
+mes_fim = 5
+dia_fim = 10
 
-    For i = 2 To lastRow
-        Dim startDate As Date
-        startDate = Cells(i, "A").Value
+# Listar os compromissos no período especificado
+compromissos = listar_compromissos(ano_inicio, mes_inicio, dia_inicio, ano_fim, mes_fim, dia_fim)
 
-        Dim endDate As Date
-        endDate = Cells(i, "A").Value + Cells(i, "B").Value
-
-        If startDate >= StartDate Of period And endDate <= EndDate Of period Then
-            ' Exibir a linha
-        Else
-            ' Ocultar a linha
-        End If
-    Next i
-
-End Sub
+# Exibir os compromissos
+print("Compromissos no período de 01 de janeiro de 2024 até 10 de maio de 2024:")
+for compromisso in compromissos:
+    print(compromisso)
