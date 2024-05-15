@@ -1,15 +1,12 @@
-import win32com.client
+from pdf2docx import parse
 
-outlook = win32com.client.Dispatch("Outlook.Application")
-namespace = outlook.GetNamespace("MAPI")
-inbox = namespace.GetDefaultFolder(6)  # 6 corresponds to the Inbox folder
+# Definindo o arquivo PDF de entrada
+arquivo_pdf = r"C:\Users\BRAUD\PROPOSTA.pdf"
 
-messages = inbox.Items
-messages.Sort("[ReceivedTime]", True)  # Sort by received time, descending
+# Definindo o arquivo Word de saída
+arquivo_docx = r"C:\Users\BRAUD\meu_arquivo.docx"
 
-for message in messages:
-    print("Subject:", message.Subject)
-    print("Received Time:", message.ReceivedTime)
-    print("Sender:", message.SenderName)
-    print("Body:", message.Body)
-    print("--------------------------")
+# Convertendo o PDF para DOCX
+parse(arquivo_pdf, arquivo_docx)
+
+print(f"Conversão de {arquivo_pdf} para {arquivo_docx} concluída!")
