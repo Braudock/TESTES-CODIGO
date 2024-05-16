@@ -1,77 +1,11 @@
-import glob
-import pandas as pd
-import os
-import datetime
-from openpyxl import load_workbook
-import win32com.client as win32
-import time
+%macro truncate_name(name);
+    %if %length(&name) > 32 %then %substr(&name, 1, 32);
+    %else &name;
+%mend truncate_name;
 
-while True:  # Loop infinito
-    caminho_diretorio = '//Fswcorp/ceic/DFEPJ/GAGIRE/22 - CARGA'
-    caminho_excel = 'C:/Users/lrsoloj/OneDrive - Banco Itau SA/Area de Trabalho/PHYTON/PROJETOS_PAYTHON/CARGA.xlsx'
-    
-    hora_atual = datetime.datetime.now()
-    data_com = []
+%let long_dataset_name = dbo.TBDPPJ_PROD_AGIR_CAMBIO_REDE_E2_E3;
+%let short_dataset_name = %truncate_name(&long_dataset_name);
 
-    for caminho_arquivo in glob.glob(os.path.join(caminho_diretorio, 'ESP*.txt')):
-        if 'COM' not in caminho_arquivo:
-            continue
-
-        timestamp = os.path.getmtime(caminho_arquivo)
-        data_modificacao = datetime.datetime.fromtimestamp(timestamp)
-        data_modificacao_str = data_modificacao.strftime('%Y-%m-%d %H:%M:%S')
-        
-        tempo_na_carga = hora_atual - data_modificacao
-        tempo_na_carga_seconds = int(tempo_na_carga.total_seconds())
-        
-        horas, resto = divmod(tempo_na_carga_seconds, 3600)
-        minutos, segundos = divmod(resto, 60)
-        tempo_na_carga_str = f"{horas:02d}:{minutos:02d}:{segundos:02d}"
-
-        # Obtém o proprietário do arquivo (somente para Windows)
-        proprietario = win32.Dispatch("WScript.Shell").CreateShortcut(caminho_arquivo).GetSecurityDescriptorOwner(False, 1)[0].GetObjectText_()
-
-        data_com.append({
-            'ARQUIVO': os.path.basename(caminho_arquivo),
-            'DATA_HORA_DISPONIBILIZACAO': data_modificacao_str,
-            'TEMPO_NA_CARGA': tempo_na_carga_str,
-            'PROPRIETARIO': proprietario
-        })
-
-    if not data_com:
-        print("Nenhuma informação coletada. E-mail não será enviado.")
-        continue
-
-    df_com = pd.DataFrame(data_com)
-
-    with pd.ExcelWriter(caminho_excel, engine='openpyxl') as writer:
-        df_com.to_excel(writer, index=False, sheet_name='dados')
-
-    print(f"Arquivo Excel salvo em: {caminho_excel}")
-
-    excel_path = os.path.join(os.getcwd(), "CARGA.xlsx")
-    df_dados = pd.read_excel(excel_path, sheet_name="dados")
-    
-    html_dados = df_dados.to_html(index=False)
-
-    outlook = win32.Dispatch("outlook.application")
-    mail = outlook.CreateItem(0)
-    mail.Subject = 'INFORMAÇÃO ARQUIVOS CARGA'
-    mail.Body = 'Segue em anexo os arquivos que estão na carga.'
-    mail.To = 
-    mail.CC = 
-    # mail.Attachments.Add(caminho_excel)
-    mail.HTMLBody = f"""
-    <html>
-        <body>
-            <p>Segue as informações dos arquivos na carga:<br></p>
-            <h2>Arquivos na carga</h2>
-            {html_dados}
-        </body>
-    </html>
-    """
-
-    mail.Send()
-    print("E-mail enviado com sucesso!")
-    print("Esperando 1 hora para a próxima execução...")
-    time.sleep(3600)  # Pausa o programa por 3600 segundos (1 hora)
+data &short_dataset_name;
+    set work.test_data;
+run;
