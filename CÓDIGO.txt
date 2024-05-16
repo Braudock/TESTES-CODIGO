@@ -1,18 +1,3 @@
-import pyodbc
+Boa tarde, Fabio.
 
-connection_string = "Driver={ODBC Driver 17 for SQL Server};Server=localhost;Database=mydatabase;UID=;PWD=yourpassword;"
-
-try:
-    connection = pyodbc.connect(connection_string)
-    print("Connected to SQL Server")
-
-    cursor = connection.cursor()
-    cursor.execute("SELECT * FROM mytable")
-    for row in cursor:
-        print(row)
-
-    cursor.close()
-    connection.close()
-
-except Exception as e:
-    print("Error connecting to SQL Server:", e)
+Por gentileza, poderia nos enviar o último e-mail com a base contendo as informações de NPS, bem como a base atualizada com as informações e também com o segmento de renovação?
