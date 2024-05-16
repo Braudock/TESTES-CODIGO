@@ -1,11 +1,33 @@
-%macro truncate_name(name);
-    %if %length(&name) > 32 %then %substr(&name, 1, 32);
-    %else &name;
-%mend truncate_name;
+import pyodbc
 
-%let long_dataset_name = dbo.TBDPPJ_PROD_AGIR_CAMBIO_REDE_E2_E3;
-%let short_dataset_name = %truncate_name(&long_dataset_name);
+# Parâmetros de conexão
+server = 'server_name'
+database = 'database_name'
+username = 'user'
+password = 'password'
 
-data &short_dataset_name;
-    set work.test_data;
-run;
+# String de conexão
+conn_str = f'DRIVER=ODBC Driver 17 for SQL Server;SERVER={server};DATABASE={database};UID={username};PWD={password}'
+
+# Conectar ao banco de dados
+conn = pyodbc.connect(conn_str)
+
+# Criar um cursor para executar consultas
+cursor = conn.cursor()
+
+# Exemplo de consulta
+sql_query = 'SELECT * FROM dbo.table_name'
+
+# Executar a consulta
+cursor.execute(sql_query)
+
+# Buscar os resultados
+results = cursor.fetchall()
+
+# Imprimir os resultados
+for row in results:
+    print(row)
+
+# Fechar o cursor e a conexão
+cursor.close()
+conn.close()
