@@ -1,49 +1,73 @@
-DATA BASE_ATUAL;
-    SET BASE_ATUAL_RAW (KEEP = NUMFUNC NOMEGRP DATABASE);
-    IF INDEX(NOMEGRP, "CONQ") > 0;
-RUN;
+/* Assumindo que a data do dia é armazenada na macrovariável hoje */
+%let hoje = %sysfunc(today(), yymmdd10.);
 
+/* Carregar as tabelas current e previous */
+data current;
+    input NUMFUNC $;
+    datalines;
+1001
+1002
+1003
+1005
+;
+run;
 
-LIBNAME TP128 '/caminho/para/a/biblioteca';
+data previous;
+    input NUMFUNC $;
+    datalines;
+1001
+1002
+1004
+;
+run;
 
-DATA BASE_ANTERIOR;
-    SET TP128.TP128_202405 (KEEP = NUMFUNC NOMEGRP DATABASE);
-RUN;
+/* Encontrar funcionários que saíram */
+proc sql;
+    create table saiu as
+    select a.NUMFUNC, "&hoje"d as DT_SAIU format=yymmdd10.
+    from previous a
+    left join current b
+    on a.NUMFUNC = b.NUMFUNC
+    where b.NUMFUNC is null;
+quit;
 
+/* Encontrar funcionários que entraram */
+proc sql;
+    create table entrou as
+    select a.NUMFUNC, "&hoje"d as DT_ENTROU format=yymmdd10.
+    from current a
+    left join previous b
+    on a.NUMFUNC = b.NUMFUNC
+    where b.NUMFUNC is null;
+quit;
 
-/* Entradas */
-DATA ENTRADAS;
-    MERGE BASE_ATUAL (IN=A) BASE_ANTERIOR (IN=B);
-    BY NUMFUNC;
-    IF A AND NOT B THEN DO;
-        DT_ENTRADA = TODAY();
-        OUTPUT;
-    END;
-RUN;
+/* Combinar as tabelas com a data de entrada e saída */
+proc sql;
+    create table final as
+    select 
+        c.NUMFUNC, 
+        coalesce(e.DT_ENTROU, .) as DT_ENTROU format=yymmdd10.,
+        coalesce(s.DT_SAIU, .) as DT_SAIU format=yymmdd10.
+    from 
+        current c
+    left join 
+        entrou e on c.NUMFUNC = e.NUMFUNC
+    left join 
+        saiu s on c.NUMFUNC = s.NUMFUNC
+    union all
+    select 
+        p.NUMFUNC,
+        coalesce(e.DT_ENTROU, .) as DT_ENTROU format=yymmdd10.,
+        coalesce(s.DT_SAIU, .) as DT_SAIU format=yymmdd10.
+    from 
+        previous p
+    left join 
+        entrou e on p.NUMFUNC = e.NUMFUNC
+    left join 
+        saiu s on p.NUMFUNC = s.NUMFUNC
+    where e.NUMFUNC is null; /* Exclui registros que já estão na primeira parte do UNION */
+quit;
 
-/* Saídas */
-DATA SAIDAS;
-    MERGE BASE_ATUAL (IN=A) BASE_ANTERIOR (IN=B);
-    BY NUMFUNC;
-    IF B AND NOT A THEN DO;
-        DT_SAIDA = TODAY();
-        OUTPUT;
-    END;
-RUN;
-
-
-DATA MOVIMENTACOES;
-    MERGE ENTRADAS SAIDAS;
-    BY NUMFUNC;
-RUN;
-
-
-PROC SQL;
-    CREATE TABLE FINAL AS
-    SELECT A.*, B.DT_ENTRADA, C.DT_SAIDA
-    FROM BASE_ATUAL A
-    LEFT JOIN ENTRADAS B ON A.NUMFUNC = B.NUMFUNC
-    LEFT JOIN SAIDAS C ON A.NUMFUNC = C.NUMFUNC;
-QUIT;
-
-
+/* Verificar a tabela final */
+proc print data=final;
+run;
