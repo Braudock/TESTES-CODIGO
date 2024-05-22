@@ -1,3 +1,49 @@
-Boa tarde, Fabio.
+DATA BASE_ATUAL;
+    SET BASE_ATUAL_RAW (KEEP = NUMFUNC NOMEGRP DATABASE);
+    IF INDEX(NOMEGRP, "CONQ") > 0;
+RUN;
 
-Por gentileza, poderia nos enviar o último e-mail com a base contendo as informações de NPS, bem como a base atualizada com as informações e também com o segmento de renovação?
+
+LIBNAME TP128 '/caminho/para/a/biblioteca';
+
+DATA BASE_ANTERIOR;
+    SET TP128.TP128_202405 (KEEP = NUMFUNC NOMEGRP DATABASE);
+RUN;
+
+
+/* Entradas */
+DATA ENTRADAS;
+    MERGE BASE_ATUAL (IN=A) BASE_ANTERIOR (IN=B);
+    BY NUMFUNC;
+    IF A AND NOT B THEN DO;
+        DT_ENTRADA = TODAY();
+        OUTPUT;
+    END;
+RUN;
+
+/* Saídas */
+DATA SAIDAS;
+    MERGE BASE_ATUAL (IN=A) BASE_ANTERIOR (IN=B);
+    BY NUMFUNC;
+    IF B AND NOT A THEN DO;
+        DT_SAIDA = TODAY();
+        OUTPUT;
+    END;
+RUN;
+
+
+DATA MOVIMENTACOES;
+    MERGE ENTRADAS SAIDAS;
+    BY NUMFUNC;
+RUN;
+
+
+PROC SQL;
+    CREATE TABLE FINAL AS
+    SELECT A.*, B.DT_ENTRADA, C.DT_SAIDA
+    FROM BASE_ATUAL A
+    LEFT JOIN ENTRADAS B ON A.NUMFUNC = B.NUMFUNC
+    LEFT JOIN SAIDAS C ON A.NUMFUNC = C.NUMFUNC;
+QUIT;
+
+
