@@ -1,1 +1,27 @@
-Bom dia, Lê. Tudo bem? Notei que me foi atribuído um novo desafio e gostaria de saber mais detalhes sobre ele.
+import os
+
+def agrupar_arquivos(caminhos_entrada, caminho_saida):
+    with open(caminho_saida, 'w') as arquivo_final:
+        for caminho in caminhos_entrada:
+            with open(caminho, 'r') as f:
+                conteudo = f.read()
+                arquivo_final.write(conteudo)
+                arquivo_final.write("\n")  # Adiciona uma nova linha entre os conteúdos dos arquivos
+
+# Exemplo de caminhos de arquivos
+caminhos_entrada = [
+    '/caminho/para/arquivo1.txt',
+    '/caminho/para/arquivo2.txt',
+    '/caminho/para/arquivo3.txt'
+]
+caminho_saida = '/caminho/para/arquivo_final.txt'
+
+# Verifica se os arquivos de entrada existem
+for caminho in caminhos_entrada:
+    if not os.path.isfile(caminho):
+        print(f"Arquivo não encontrado: {caminho}")
+        exit()
+
+agrupar_arquivos(caminhos_entrada, caminho_saida)
+print(f"Arquivos foram agrupados em {caminho_saida}")
+
