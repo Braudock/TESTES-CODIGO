@@ -1,1 +1,20 @@
-Analista de Planejamento Empresarial Pleno com mais de 5 anos de experiência, especializei-me emmodelagem e análise de dados. Destaco-me na criação de KPIs, automação de processos usando SAS,Python e VBA, e na transformação de dados em insights estratégicos. Minha expertise em otimizaçãooperacional e estratégica tem sido fundamental em ambientes dinâmicos e exigentes.
+/* Ordenar as bases pelos campos PLATAFORMA e GERENTE */
+proc sort data=your_library.COM_VP_TOP;
+    by PLATAFORMA GERENTE;
+run;
+
+proc sort data=your_library.CADASTRO_TOP;
+    by PLATAFORMA GERENTE;
+run;
+
+/* Criar uma nova base excluindo as informações presentes em CADASTRO_TOP */
+data your_library.COM_VP_TOP_CLEAN;
+    merge your_library.COM_VP_TOP (in=a) 
+          your_library.CADASTRO_TOP (in=b);
+    by PLATAFORMA GERENTE;
+    if a and not b;
+run;
+
+/* Visualizar o resultado */
+proc print data=your_library.COM_VP_TOP_CLEAN;
+run;
