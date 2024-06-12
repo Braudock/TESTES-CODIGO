@@ -1,6 +1,13 @@
 import os
 import tkinter as tk
 from tkinter import messagebox, ttk
+import pythoncom
+import win32com.client
+
+def resolve_shortcut(path):
+    shell = win32com.client.Dispatch("WScript.Shell")
+    shortcut = shell.CreateShortcut(path)
+    return shortcut.TargetPath
 
 def open_folder(folder_path):
     try:
@@ -8,12 +15,24 @@ def open_folder(folder_path):
     except Exception as e:
         messagebox.showerror("Erro", f"Não foi possível abrir a pasta: {e}")
 
+def is_directory_or_shortcut(base_path, item):
+    item_path = os.path.join(base_path, item)
+    if os.path.isdir(item_path):
+        return True
+    elif item_path.endswith('.lnk'):
+        target_path = resolve_shortcut(item_path)
+        return os.path.isdir(target_path)
+    return False
+
 def create_folder_buttons(frame, base_path):
-    folders = [f for f in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, f))]
-    for folder in folders:
-        folder_path = os.path.join(base_path, folder)
-        button = tk.Button(frame, text=folder, command=lambda p=folder_path: open_folder(p))
-        button.pack(fill=tk.X)
+    items = os.listdir(base_path)
+    for item in items:
+        if is_directory_or_shortcut(base_path, item):
+            item_path = os.path.join(base_path, item)
+            if item_path.endswith('.lnk'):
+                item_path = resolve_shortcut(item_path)
+            button = tk.Button(frame, text=item, command=lambda p=item_path: open_folder(p))
+            button.pack(fill=tk.X)
 
 def main():
     base_path = r"C:\caminho\para\pasta"  # Altere para o caminho da sua pasta
