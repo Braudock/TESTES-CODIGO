@@ -1,3 +1,30 @@
-Boa tarde, Roseli. Tudo bem?
+import os
+import tkinter as tk
+from tkinter import messagebox
 
-Em resposta ao seu questionamento, tivemos migrações durante o período que entraram para sua plataforma, além dos CNPJs que migraram para a plataforma 0265. No print abaixo, mostro como você pode visualizar as migrações durante os refresh de meta, acessando o relatório "Histórico de recebimentos" na coluna "Entrou".
+def open_folder(folder_path):
+    # Tenta abrir a pasta no gerenciador de arquivos
+    try:
+        os.startfile(folder_path)
+    except Exception as e:
+        messagebox.showerror("Erro", f"Não foi possível abrir a pasta: {e}")
+
+def create_folder_buttons(root, base_path):
+    folders = [f for f in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, f))]
+    for folder in folders:
+        folder_path = os.path.join(base_path, folder)
+        button = tk.Button(root, text=folder, command=lambda p=folder_path: open_folder(p))
+        button.pack(fill=tk.X)
+
+def main():
+    base_path = r"C:\caminho\para\pasta"  # Altere para o caminho da sua pasta
+
+    root = tk.Tk()
+    root.title("Seletor de Pastas")
+
+    create_folder_buttons(root, base_path)
+
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()
