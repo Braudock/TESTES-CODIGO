@@ -1,20 +1,3 @@
-/* Ordenar as bases pelos campos PLATAFORMA e GERENTE */
-proc sort data=your_library.COM_VP_TOP;
-    by PLATAFORMA GERENTE;
-run;
+Boa tarde, Roseli. Tudo bem?
 
-proc sort data=your_library.CADASTRO_TOP;
-    by PLATAFORMA GERENTE;
-run;
-
-/* Criar uma nova base excluindo as informações presentes em CADASTRO_TOP */
-data your_library.COM_VP_TOP_CLEAN;
-    merge your_library.COM_VP_TOP (in=a) 
-          your_library.CADASTRO_TOP (in=b);
-    by PLATAFORMA GERENTE;
-    if a and not b;
-run;
-
-/* Visualizar o resultado */
-proc print data=your_library.COM_VP_TOP_CLEAN;
-run;
+Em resposta ao seu questionamento, tivemos migrações durante o período que entraram para sua plataforma, além dos CNPJs que migraram para a plataforma 0265. No print abaixo, mostro como você pode visualizar as migrações durante os refresh de meta, acessando o relatório "Histórico de recebimentos" na coluna "Entrou".
