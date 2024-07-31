@@ -1,60 +1,22 @@
+/* Ordenar as bases por chave */
+proc sort data=202407; 
+    by chave; 
+run;
 
+proc sort data=202408; 
+    by chave; 
+run;
 
-/* Ordene as bases por chave antes de mesclar */
-proc sort data=202407; by chave; run;
-proc sort data=202408; by chave; run;
-
-/* Mescle as duas bases */
-data comparacao;
-    merge 202407(in=a) 202408(in=b);
+/* Encontrar registros que saíram da base 202407 */
+data registros_sairam;
+    merge 202407 (in=a) 202408 (in=b);
     by chave;
-    if a and not b then output registros_sairam; /* Registros que saíram */
-    if b and not a then output registros_entraram; /* Registros que entraram */
+    if a and not b; /* Registros em 202407 que não estão em 202408 */
 run;
 
-
-
-proc sql;
-    create index chave on 202407(chave);
-    create index chave on 202408(chave);
-quit;
-
-
-/* Encontrar registros que saíram */
-proc sql;
-    create table registros_sairam as
-    select a.*
-    from 202407 as a
-    left join 202408 as b
-    on a.chave = b.chave
-    where b.chave is null;
-quit;
-
-/* Encontrar registros que entraram */
-proc sql;
-    create table registros_entraram as
-    select b.*
-    from 202408 as b
-    left join 202407 as a
-    on b.chave = a.chave
-    where a.chave is null;
-quit;
-
-
-/* Exemplo de processamento em batches */
-data batch_1;
-    set 202407 (firstobs=1 obs=100000);
+/* Encontrar registros que entraram na base 202408 */
+data registros_entraram;
+    merge 202408 (in=b) 202407 (in=a);
+    by chave;
+    if b and not a; /* Registros em 202408 que não estão em 202407 */
 run;
-
-data batch_2;
-    set 202407 (firstobs=100001 obs=200000);
-run;
-
-/* Repita para outras partes */
-
-proc sql;
-    create table registros_sairam as
-    select *
-    from batch_1
-    where not exists (select 1 from 202408 where batch_1.chave = 202408.chave);
-quit;
