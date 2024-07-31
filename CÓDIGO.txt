@@ -1,69 +1,14 @@
-/* Carregar as bases de dados */
-data base202407;
-    set your_library.base202407;
-run;
-
-data base202408;
-    set your_library.base202408;
-run;
-
-/* Criar uma tabela combinada com as duas bases de dados */
 proc sql;
-    create table combined as
-    select 
-        a.id as id_202407,
-        b.id as id_202408
-    from
-        base202407 as a
-    full join
-        base202408 as b
-    on 
-        a.id = b.id;
+    create table registros_sairam as
+    select *
+    from 202407
+    where not exists (select 1 from 202408 where 202407.chave = 202408.chave);
 quit;
 
-/* Identificar registros que saíram da base 202407 e entraram na base 202408 */
-data final;
-    set combined;
-    if id_202407 ne . and id_202408 = . then status = "saiu";
-    else if id_202407 = . and id_202408 ne . then status = "entrou";
-    else status = "permaneceu";
-run;
 
-/* Atualizar as bases com a informação de status */
-
-/* Base 202407 com status */
 proc sql;
-    create table base202407_final as
-    select 
-        a.*, 
-        b.status
-    from 
-        base202407 as a
-    left join 
-        final as b
-    on 
-        a.id = b.id_202407;
+    create table registros_entraram as
+    select *
+    from 202408
+    where not exists (select 1 from 202407 where 202408.chave = 202407.chave);
 quit;
-
-/* Base 202408 com status */
-proc sql;
-    create table base202408_final as
-    select 
-        a.*, 
-        b.status
-    from 
-        base202408 as a
-    left join 
-        final as b
-    on 
-        a.id = b.id_202408;
-quit;
-
-/* Salvar as bases atualizadas */
-data your_library.base202407_final;
-    set base202407_final;
-run;
-
-data your_library.base202408_final;
-    set base202408_final;
-run;
