@@ -7,46 +7,57 @@ data base202408;
     set your_library.base202408;
 run;
 
-/* Identificar registros que saíram da base 202407 */
+/* Criar uma tabela combinada com as duas bases de dados */
 proc sql;
-    create table saiu_base202407 as
-    select a.*
-    from base202407 as a
-    left join base202408 as b
-    on a.id = b.id
-    where b.id is null;
+    create table combined as
+    select 
+        a.id as id_202407,
+        b.id as id_202408
+    from
+        base202407 as a
+    full join
+        base202408 as b
+    on 
+        a.id = b.id;
 quit;
 
-/* Adicionar coluna indicando que saiu */
-data saiu_base202407;
-    set saiu_base202407;
-    status = "saiu";
+/* Identificar registros que saíram da base 202407 e entraram na base 202408 */
+data final;
+    set combined;
+    if id_202407 ne . and id_202408 = . then status = "saiu";
+    else if id_202407 = . and id_202408 ne . then status = "entrou";
+    else status = "permaneceu";
 run;
 
-/* Identificar registros que entraram na base 202408 */
+/* Atualizar as bases com a informação de status */
+
+/* Base 202407 com status */
 proc sql;
-    create table entrou_base202408 as
-    select b.*
-    from base202408 as b
-    left join base202407 as a
-    on b.id = a.id
-    where a.id is null;
+    create table base202407_final as
+    select 
+        a.*, 
+        b.status
+    from 
+        base202407 as a
+    left join 
+        final as b
+    on 
+        a.id = b.id_202407;
 quit;
 
-/* Adicionar coluna indicando que entrou */
-data entrou_base202408;
-    set entrou_base202408;
-    status = "entrou";
-run;
-
-/* Atualizar as bases originais com as novas informações */
-data base202407_final;
-    set base202407 saiu_base202407;
-run;
-
-data base202408_final;
-    set base202408 entrou_base202408;
-run;
+/* Base 202408 com status */
+proc sql;
+    create table base202408_final as
+    select 
+        a.*, 
+        b.status
+    from 
+        base202408 as a
+    left join 
+        final as b
+    on 
+        a.id = b.id_202408;
+quit;
 
 /* Salvar as bases atualizadas */
 data your_library.base202407_final;
