@@ -1,22 +1,18 @@
-/* Ordenar as bases por chave */
-proc sort data=202407; 
-    by chave; 
-run;
+proc sql;
+    create table removidos as
+    select a.*
+    from Base_Anterior as a
+    left join Base_Atual as b
+    on a.CNPJ = b.CNPJ
+    where b.CNPJ is null;
+quit;
 
-proc sort data=202408; 
-    by chave; 
-run;
 
-/* Encontrar registros que saíram da base 202407 */
-data registros_sairam;
-    merge 202407 (in=a) 202408 (in=b);
-    by chave;
-    if a and not b; /* Registros em 202407 que não estão em 202408 */
-run;
-
-/* Encontrar registros que entraram na base 202408 */
-data registros_entraram;
-    merge 202408 (in=b) 202407 (in=a);
-    by chave;
-    if b and not a; /* Registros em 202408 que não estão em 202407 */
-run;
+proc sql;
+    create table adicionados as
+    select b.*
+    from Base_Atual as b
+    left join Base_Anterior as a
+    on b.CNPJ = a.CNPJ
+    where a.CNPJ is null;
+quit;
