@@ -1,9 +1,59 @@
-Claro, aqui está o texto revisado e melhorado:
+Passo 2: Adicionar uma coluna de identificação em cada base
+Para identificar se um registro está em uma base e não na outra, adicione uma coluna ID em cada uma das bases.
 
----
+data BASE_202407_mod;
+    set BASE_202407;
+    ID = 1;
+run;
 
-"Bom dia, Luiz. Em relação ao seu questionamento, o crescimento das plataformas mencionadas está alinhado com o histórico de atuação de cada uma. Além disso, as metas não são comparáveis, mesmo que se refiram à mesma região."
+data BASE_202408_mod;
+    set BASE_202408;
+    ID = 2;
+run;
 
----
+Passo 3: Combinar as bases
+Combine as duas bases para facilitar a comparação.
 
-Isso torna a mensagem mais clara e estruturada.
+data combined;
+    set BASE_202407_mod BASE_202408_mod;
+run;
+
+
+Passo 4: Encontrar diferenças
+Use a função PROC SQL para identificar as diferenças.
+
+proc sql;
+    create table left_only as
+    select *
+    from BASE_202407_mod
+    where not exists (select 1 from BASE_202408_mod
+                      where BASE_202407_mod.CNPJ = BASE_202408_mod.CNPJ);
+
+    create table right_only as
+    select *
+    from BASE_202408_mod
+    where not exists (select 1 from BASE_202407_mod
+                      where BASE_202408_mod.CNPJ = BASE_202407_mod.CNPJ);
+quit;
+
+
+Passo 5: Adicionar colunas de marcação
+
+data left_only;
+    set left_only;
+    Status = "Saiu";
+run;
+
+data right_only;
+    set right_only;
+    Status = "Entrou";
+run;
+
+
+Passo 6: Agrupar os resultados em uma única tabela
+Combine os resultados em uma tabela final.
+
+data final;
+    set left_only right_only;
+run;
+
