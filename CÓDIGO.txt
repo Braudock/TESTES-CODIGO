@@ -1,59 +1,58 @@
-Passo 2: Adicionar uma coluna de identificação em cada base
-Para identificar se um registro está em uma base e não na outra, adicione uma coluna ID em cada uma das bases.
-
-data BASE_202407_mod;
-    set BASE_202407;
-    ID = 1;
+/* Carregar as bases de dados */
+data base202407;
+    set your_library.base202407;
 run;
 
-data BASE_202408_mod;
-    set BASE_202408;
-    ID = 2;
+data base202408;
+    set your_library.base202408;
 run;
 
-Passo 3: Combinar as bases
-Combine as duas bases para facilitar a comparação.
-
-data combined;
-    set BASE_202407_mod BASE_202408_mod;
-run;
-
-
-Passo 4: Encontrar diferenças
-Use a função PROC SQL para identificar as diferenças.
-
+/* Identificar registros que saíram da base 202407 */
 proc sql;
-    create table left_only as
-    select *
-    from BASE_202407_mod
-    where not exists (select 1 from BASE_202408_mod
-                      where BASE_202407_mod.CNPJ = BASE_202408_mod.CNPJ);
-
-    create table right_only as
-    select *
-    from BASE_202408_mod
-    where not exists (select 1 from BASE_202407_mod
-                      where BASE_202408_mod.CNPJ = BASE_202407_mod.CNPJ);
+    create table saiu_base202407 as
+    select a.*
+    from base202407 as a
+    left join base202408 as b
+    on a.id = b.id
+    where b.id is null;
 quit;
 
-
-Passo 5: Adicionar colunas de marcação
-
-data left_only;
-    set left_only;
-    Status = "Saiu";
+/* Adicionar coluna indicando que saiu */
+data saiu_base202407;
+    set saiu_base202407;
+    status = "saiu";
 run;
 
-data right_only;
-    set right_only;
-    Status = "Entrou";
+/* Identificar registros que entraram na base 202408 */
+proc sql;
+    create table entrou_base202408 as
+    select b.*
+    from base202408 as b
+    left join base202407 as a
+    on b.id = a.id
+    where a.id is null;
+quit;
+
+/* Adicionar coluna indicando que entrou */
+data entrou_base202408;
+    set entrou_base202408;
+    status = "entrou";
 run;
 
-
-Passo 6: Agrupar os resultados em uma única tabela
-Combine os resultados em uma tabela final.
-
-data final;
-    set left_only right_only;
+/* Atualizar as bases originais com as novas informações */
+data base202407_final;
+    set base202407 saiu_base202407;
 run;
 
+data base202408_final;
+    set base202408 entrou_base202408;
+run;
+
+/* Salvar as bases atualizadas */
+data your_library.base202407_final;
+    set base202407_final;
+run;
+
+data your_library.base202408_final;
+    set base202408_final;
+run;
