@@ -1,18 +1,9 @@
-proc sql;
-    create table removidos as
-    select a.*
-    from Base_Anterior as a
-    left join Base_Atual as b
-    on a.CNPJ = b.CNPJ
-    where b.CNPJ is null;
-quit;
+ECEITA
 
+Para LUIS RICARDO DA SILVA FERREIRA
 
-proc sql;
-    create table adicionados as
-    select b.*
-    from Base_Atual as b
-    left join Base_Anterior as a
-    on b.CNPJ = a.CNPJ
-    where a.CNPJ is null;
-quit;
+ATESTADO DE SAÚDE
+
+Atesto, para os devidos fins, que o paciente supracitado deve permanecer afastado por 3 meses a contar da data do seu acidente, podendo manter suas atividades laborais de forma remota, caso sua função permita.
+
+S86.0
