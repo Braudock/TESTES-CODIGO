@@ -1,0 +1,79 @@
+import os
+import tkinter as tk
+from tkinter import messagebox
+from tkinter import filedialog
+from tkinter import ttk
+import subprocess
+from datetime import datetime
+
+# Caminho base
+base_path = r"\\Fswcorp\ceic\DFEPJ\GAGIRE\22 - CARGA\arquivos_processados"
+
+# Função para buscar arquivos com "8034" no nome
+def search_files():
+    found_files = []
+    for root, dirs, files in os.walk(base_path):
+        for file in files:
+            if "8034" in file and file.endswith(".txt"):
+                full_path = os.path.join(root, file)
+                mod_time = os.path.getmtime(full_path)
+                formatted_time = datetime.fromtimestamp(mod_time).strftime('%Y-%m-%d %H:%M:%S')
+                found_files.append((file, full_path, formatted_time))
+    return found_files
+
+# Função para abrir o arquivo selecionado
+def open_file(filepath):
+    try:
+        if os.name == 'nt':  # Windows
+            os.startfile(filepath)
+        else:
+            subprocess.call(('xdg-open', filepath))  # Linux/Mac
+    except Exception as e:
+        messagebox.showerror("Erro", f"Erro ao abrir o arquivo: {e}")
+
+# Função para preencher a treeview com os arquivos encontrados
+def populate_tree():
+    for item in tree.get_children():
+        tree.delete(item)
+    
+    files = search_files()
+    for idx, (filename, path, mod_time) in enumerate(files):
+        tree.insert('', 'end', iid=idx, values=(filename, mod_time, path))
+
+# Função ao clicar no item da lista
+def on_item_click(event):
+    selected_item = tree.selection()[0]
+    file_path = tree.item(selected_item, 'values')[2]
+    open_file(file_path)
+
+# Criação da interface gráfica
+root = tk.Tk()
+root.title("Buscar Arquivos 8034")
+root.geometry("700x400")
+
+# Frame de controle
+frame = ttk.Frame(root)
+frame.pack(pady=20)
+
+# Botão para carregar arquivos
+btn_load = ttk.Button(frame, text="Buscar Arquivos", command=populate_tree)
+btn_load.pack()
+
+# Treeview para listar os arquivos encontrados
+columns = ('Nome do Arquivo', 'Data de Modificação', 'Caminho Completo')
+tree = ttk.Treeview(root, columns=columns, show='headings')
+tree.heading('Nome do Arquivo', text='Nome do Arquivo')
+tree.heading('Data de Modificação', text='Data de Modificação')
+tree.heading('Caminho Completo', text='Caminho Completo')
+
+tree.column('Nome do Arquivo', width=200)
+tree.column('Data de Modificação', width=150)
+tree.column('Caminho Completo', width=350)
+
+tree.pack(fill=tk.BOTH, expand=True)
+
+# Bind para detectar duplo clique no item da lista
+tree.bind("<Double-1>", on_item_click)
+
+# Iniciar a interface
+root.mainloop()
