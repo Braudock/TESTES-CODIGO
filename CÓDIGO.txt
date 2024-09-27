@@ -1,0 +1,82 @@
+import os
+from tkinter import Tk, Listbox, Button, Label, END, Scrollbar, filedialog, messagebox
+from datetime import datetime
+import subprocess
+
+def listar_pastas_arquivos(caminho):
+    """Lista arquivos e pastas do caminho selecionado."""
+    try:
+        lista_pastas_arquivos.delete(0, END)
+        for item in os.listdir(caminho):
+            item_path = os.path.join(caminho, item)
+            data_mod = os.path.getmtime(item_path)
+            data_mod_formatada = datetime.fromtimestamp(data_mod).strftime('%Y-%m-%d %H:%M:%S')
+            
+            if os.path.isdir(item_path):
+                lista_pastas_arquivos.insert(END, f"Pasta: {item} (Modificada: {data_mod_formatada})")
+            else:
+                lista_pastas_arquivos.insert(END, f"Arquivo: {item} (Modificado: {data_mod_formatada})")
+    except Exception as e:
+        messagebox.showerror("Erro", f"Ocorreu um erro: {e}")
+
+def selecionar_pasta():
+    """Abre a janela de seleção de pasta."""
+    caminho = filedialog.askdirectory()
+    if caminho:
+        caminho_selecionado.set(caminho)
+        listar_pastas_arquivos(caminho)
+
+def abrir_arquivo(caminho_arquivo):
+    """Tenta abrir o arquivo usando o aplicativo padrão do sistema."""
+    try:
+        if os.path.exists(caminho_arquivo):
+            # Abrir arquivo com o aplicativo padrão no Windows
+            os.startfile(caminho_arquivo)
+        else:
+            messagebox.showerror("Erro", f"Arquivo não encontrado: {caminho_arquivo}")
+    except Exception as e:
+        messagebox.showerror("Erro ao abrir o arquivo", str(e))
+
+def exibir_detalhes():
+    """Exibe os detalhes da pasta ou arquivo selecionado."""
+    selecao = lista_pastas_arquivos.curselection()
+    if selecao:
+        item_selecionado = lista_pastas_arquivos.get(selecao)
+        caminho_arquivo = os.path.join(caminho_selecionado.get(), item_selecionado.split(" (")[0].split(": ")[1])
+        
+        if "Arquivo" in item_selecionado:
+            abrir_arquivo(caminho_arquivo)
+        else:
+            messagebox.showinfo("Detalhes", item_selecionado)
+    else:
+        messagebox.showwarning("Atenção", "Nenhum item foi selecionado.")
+
+# Criando a janela principal
+janela = Tk()
+janela.title("Explorador de Pastas e Arquivos")
+janela.geometry("600x400")
+
+# Label para o caminho da pasta
+caminho_selecionado = Label(janela, text="Selecione uma pasta:")
+caminho_selecionado.pack(pady=10)
+
+# Botão para selecionar a pasta
+btn_selecionar_pasta = Button(janela, text="Selecionar Pasta", command=selecionar_pasta)
+btn_selecionar_pasta.pack(pady=10)
+
+# Listbox para exibir as pastas e arquivos
+lista_pastas_arquivos = Listbox(janela, width=80, height=15)
+lista_pastas_arquivos.pack(pady=10)
+
+# Scrollbar para a lista
+scrollbar = Scrollbar(janela)
+scrollbar.pack(side="right", fill="y")
+lista_pastas_arquivos.config(yscrollcommand=scrollbar.set)
+scrollbar.config(command=lista_pastas_arquivos.yview)
+
+# Botão para exibir detalhes ou abrir arquivo
+btn_exibir_detalhes = Button(janela, text="Abrir Arquivo / Exibir Detalhes", command=exibir_detalhes)
+btn_exibir_detalhes.pack(pady=10)
+
+# Executa a janela
+janela.mainloop()
