@@ -1,82 +1,122 @@
 import os
-from tkinter import Tk, Listbox, Button, Label, END, Scrollbar, filedialog, messagebox
-from datetime import datetime
+import tkinter as tk
+from tkinter import messagebox
+from tkinter import ttk
 import subprocess
+from datetime import datetime
 
-def listar_pastas_arquivos(caminho):
-    """Lista arquivos e pastas do caminho selecionado."""
+# Função para buscar arquivos com o código no nome e ordenar pela data de modificação
+def search_files(base_path, search_code):
+    found_files = []
+    for root, dirs, files in os.walk(base_path):
+        for file in files:
+            if search_code in file and file.endswith(".txt"):
+                full_path = os.path.join(root, file)
+                try:
+                    mod_time = os.path.getmtime(full_path)
+                    formatted_time = datetime.fromtimestamp(mod_time).strftime('%d de %B de %Y')
+                    found_files.append((file, full_path, mod_time, formatted_time))
+                except Exception as e:
+                    print(f"Erro ao acessar o arquivo {full_path}: {e}")
+    
+    # Ordena do mais recente para o mais antigo pela data de modificação (mod_time)
+    found_files.sort(key=lambda x: x[2], reverse=True)
+    
+    return found_files
+
+# Função para abrir o arquivo selecionado
+def open_file(filepath):
     try:
-        lista_pastas_arquivos.delete(0, END)
-        for item in os.listdir(caminho):
-            item_path = os.path.join(caminho, item)
-            data_mod = os.path.getmtime(item_path)
-            data_mod_formatada = datetime.fromtimestamp(data_mod).strftime('%Y-%m-%d %H:%M:%S')
-            
-            if os.path.isdir(item_path):
-                lista_pastas_arquivos.insert(END, f"Pasta: {item} (Modificada: {data_mod_formatada})")
-            else:
-                lista_pastas_arquivos.insert(END, f"Arquivo: {item} (Modificado: {data_mod_formatada})")
+        if os.name == 'nt':  # Windows
+            os.startfile(filepath)
+        else:  # Linux ou Mac
+            subprocess.run(['xdg-open', filepath], check=True)
     except Exception as e:
-        messagebox.showerror("Erro", f"Ocorreu um erro: {e}")
+        messagebox.showerror("Erro", f"Erro ao abrir o arquivo: {e}")
 
-def selecionar_pasta():
-    """Abre a janela de seleção de pasta."""
-    caminho = filedialog.askdirectory()
-    if caminho:
-        caminho_selecionado.set(caminho)
-        listar_pastas_arquivos(caminho)
+# Função para preencher a treeview com os arquivos encontrados
+def populate_tree():
+    search_code = entry_code.get().strip()
+    if not search_code:
+        messagebox.showwarning("Entrada Vazia", "Por favor, insira um código para buscar.")
+        return
+    
+    for item in tree.get_children():
+        tree.delete(item)
+    
+    files = search_files(base_path, search_code)
+    if not files:
+        messagebox.showinfo("Nenhum Arquivo Encontrado", f"Nenhum arquivo encontrado com o código '{search_code}'.")
+        return
+    
+    for idx, (filename, path, mod_time, formatted_time) in enumerate(files):
+        tree.insert('', 'end', iid=idx, values=(filename, formatted_time, path))
 
-def abrir_arquivo(caminho_arquivo):
-    """Tenta abrir o arquivo usando o aplicativo padrão do sistema."""
-    try:
-        if os.path.exists(caminho_arquivo):
-            # Abrir arquivo com o aplicativo padrão no Windows
-            os.startfile(caminho_arquivo)
-        else:
-            messagebox.showerror("Erro", f"Arquivo não encontrado: {caminho_arquivo}")
-    except Exception as e:
-        messagebox.showerror("Erro ao abrir o arquivo", str(e))
+# Função ao clicar no item da lista
+def on_item_click(event):
+    selected_items = tree.selection()
+    if not selected_items:
+        return
+    selected_item = selected_items[0]
+    file_path = tree.item(selected_item, 'values')[2]
+    open_file(file_path)
 
-def exibir_detalhes():
-    """Exibe os detalhes da pasta ou arquivo selecionado."""
-    selecao = lista_pastas_arquivos.curselection()
-    if selecao:
-        item_selecionado = lista_pastas_arquivos.get(selecao)
-        caminho_arquivo = os.path.join(caminho_selecionado.get(), item_selecionado.split(" (")[0].split(": ")[1])
-        
-        if "Arquivo" in item_selecionado:
-            abrir_arquivo(caminho_arquivo)
-        else:
-            messagebox.showinfo("Detalhes", item_selecionado)
-    else:
-        messagebox.showwarning("Atenção", "Nenhum item foi selecionado.")
+# Caminho base
+base_path = r"\\Fswcorp\ceic\DFEPJ\GAGIRE\22 - CARGA\arquivos_processados"
 
-# Criando a janela principal
-janela = Tk()
-janela.title("Explorador de Pastas e Arquivos")
-janela.geometry("600x400")
+# Criação da interface gráfica
+root = tk.Tk()
+root.title("Buscar Arquivos por Código")
+root.geometry("800x500")
 
-# Label para o caminho da pasta
-caminho_selecionado = Label(janela, text="Selecione uma pasta:")
-caminho_selecionado.pack(pady=10)
+# Frame de controle para entrada de código e botão
+control_frame = ttk.Frame(root)
+control_frame.pack(pady=10, padx=10, fill=tk.X)
 
-# Botão para selecionar a pasta
-btn_selecionar_pasta = Button(janela, text="Selecionar Pasta", command=selecionar_pasta)
-btn_selecionar_pasta.pack(pady=10)
+# Label e Entry para o código de busca
+label_code = ttk.Label(control_frame, text="Código:")
+label_code.pack(side=tk.LEFT, padx=(0, 5))
 
-# Listbox para exibir as pastas e arquivos
-lista_pastas_arquivos = Listbox(janela, width=80, height=15)
-lista_pastas_arquivos.pack(pady=10)
+entry_code = ttk.Entry(control_frame, width=20)
+entry_code.pack(side=tk.LEFT, padx=(0, 10))
+entry_code.bind("<Return>", lambda event: populate_tree())  # Permite buscar pressionando Enter
 
-# Scrollbar para a lista
-scrollbar = Scrollbar(janela)
-scrollbar.pack(side="right", fill="y")
-lista_pastas_arquivos.config(yscrollcommand=scrollbar.set)
-scrollbar.config(command=lista_pastas_arquivos.yview)
+# Botão para carregar arquivos
+btn_load = ttk.Button(control_frame, text="Buscar Arquivos", command=populate_tree)
+btn_load.pack(side=tk.LEFT)
 
-# Botão para exibir detalhes ou abrir arquivo
-btn_exibir_detalhes = Button(janela, text="Abrir Arquivo / Exibir Detalhes", command=exibir_detalhes)
-btn_exibir_detalhes.pack(pady=10)
+# Frame para Treeview e Scrollbar
+tree_frame = ttk.Frame(root)
+tree_frame.pack(pady=10, padx=10, fill=tk.BOTH, expand=True)
 
-# Executa a janela
-janela.mainloop()
+# Scrollbar vertical
+tree_scroll = ttk.Scrollbar(tree_frame, orient=tk.VERTICAL)
+tree_scroll.pack(side=tk.RIGHT, fill=tk.Y)
+
+# Scrollbar horizontal
+tree_scroll_x = ttk.Scrollbar(tree_frame, orient=tk.HORIZONTAL)
+tree_scroll_x.pack(side=tk.BOTTOM, fill=tk.X)
+
+# Treeview para listar os arquivos encontrados
+columns = ('Nome do Arquivo', 'Data de Modificação', 'Caminho Completo')
+tree = ttk.Treeview(tree_frame, columns=columns, show='headings',
+                    yscrollcommand=tree_scroll.set, xscrollcommand=tree_scroll_x.set)
+tree.heading('Nome do Arquivo', text='Nome do Arquivo')
+tree.heading('Data de Modificação', text='Data de Modificação')
+tree.heading('Caminho Completo', text='Caminho Completo')
+
+tree.column('Nome do Arquivo', width=250, anchor='w')
+tree.column('Data de Modificação', width=200, anchor='center')
+tree.column('Caminho Completo', width=400, anchor='w')
+
+tree.pack(fill=tk.BOTH, expand=True)
+
+# Configuração das scrollbars
+tree_scroll.config(command=tree.yview)
+tree_scroll_x.config(command=tree.xview)
+
+# Bind para detectar duplo clique no item da lista
+tree.bind("<Double-1>", on_item_click)
+
+# Iniciar a interface
+root.mainloop()
