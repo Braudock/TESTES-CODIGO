@@ -1,0 +1,64 @@
+pip install tk
+
+
+import os
+import tkinter as tk
+from tkinter import filedialog, messagebox
+
+# Função para buscar arquivos txt que contenham o código especificado
+def procurar_arquivos_txt(caminho, codigo):
+    arquivos_com_codigo = []
+    
+    # Caminha pelos diretórios e subdiretórios
+    for root, dirs, files in os.walk(caminho):
+        for file in files:
+            if file.endswith(".txt"):
+                file_path = os.path.join(root, file)
+                try:
+                    # Verifica se o arquivo contém o código desejado
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        conteudo = f.read()
+                        if codigo in conteudo:
+                            arquivos_com_codigo.append((file_path, os.path.getmtime(file_path)))
+                except Exception as e:
+                    print(f"Erro ao abrir o arquivo {file}: {e}")
+    
+    # Retorna o último arquivo modificado
+    if arquivos_com_codigo:
+        return sorted(arquivos_com_codigo, key=lambda x: x[1], reverse=True)[0][0]
+    else:
+        return None
+
+# Função chamada ao clicar no botão de busca
+def buscar_arquivo():
+    caminho = filedialog.askdirectory()
+    if caminho:
+        codigo = entry_codigo.get()
+        if codigo:
+            resultado = procurar_arquivos_txt(caminho, codigo)
+            if resultado:
+                messagebox.showinfo("Arquivo encontrado", f"O último arquivo modificado que contém o código foi encontrado:\n{resultado}")
+            else:
+                messagebox.showwarning("Aviso", "Nenhum arquivo .txt com o código especificado foi encontrado.")
+        else:
+            messagebox.showwarning("Aviso", "Por favor, insira um código para procurar.")
+    else:
+        messagebox.showwarning("Aviso", "Por favor, selecione um diretório.")
+
+# Cria a interface gráfica
+root = tk.Tk()
+root.title("Buscar Arquivos .txt")
+
+# Label e campo de texto para inserir o código a ser procurado
+label_codigo = tk.Label(root, text="Digite o código a ser procurado:")
+label_codigo.pack(pady=5)
+
+entry_codigo = tk.Entry(root, width=50)
+entry_codigo.pack(pady=5)
+
+# Botão para iniciar a busca
+btn_buscar = tk.Button(root, text="Buscar Arquivo", command=buscar_arquivo)
+btn_buscar.pack(pady=20)
+
+# Inicia a interface gráfica
+root.mainloop()
