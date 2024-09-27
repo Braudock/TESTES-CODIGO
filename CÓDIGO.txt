@@ -63,9 +63,17 @@ frame.pack(pady=20)
 btn_load = ttk.Button(frame, text="Buscar Arquivos", command=populate_tree)
 btn_load.pack()
 
+# Frame para Treeview e Scrollbar
+tree_frame = ttk.Frame(root)
+tree_frame.pack(fill=tk.BOTH, expand=True)
+
+# Scrollbar vertical
+tree_scroll = ttk.Scrollbar(tree_frame)
+tree_scroll.pack(side=tk.RIGHT, fill=tk.Y)
+
 # Treeview para listar os arquivos encontrados
 columns = ('Nome do Arquivo', 'Data de Modificação', 'Caminho Completo')
-tree = ttk.Treeview(root, columns=columns, show='headings')
+tree = ttk.Treeview(tree_frame, columns=columns, show='headings', yscrollcommand=tree_scroll.set)
 tree.heading('Nome do Arquivo', text='Nome do Arquivo')
 tree.heading('Data de Modificação', text='Data de Modificação')
 tree.heading('Caminho Completo', text='Caminho Completo')
@@ -75,6 +83,9 @@ tree.column('Data de Modificação', width=150)
 tree.column('Caminho Completo', width=350)
 
 tree.pack(fill=tk.BOTH, expand=True)
+
+# Configuração da scrollbar para funcionar com a Treeview
+tree_scroll.config(command=tree.yview)
 
 # Bind para detectar duplo clique no item da lista
 tree.bind("<Double-1>", on_item_click)
