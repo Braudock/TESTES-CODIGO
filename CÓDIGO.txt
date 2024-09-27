@@ -1,7 +1,138 @@
 import os
 import tkinter as tk
 from tkinter import messagebox
-from tkinter import filedialog
+from tkinter import ttk
+import subprocess
+from datetime import datetime
+
+# Função para buscar arquivos com o código no nome e ordenar pela data de modificação
+def search_files(base_path, search_code):
+    found_files = []
+    for root, dirs, files in os.walk(base_path):
+        for file in files:
+            if search_code in file and file.endswith(".txt"):
+                full_path = os.path.join(root, file)
+                try:
+                    mod_time = os.path.getmtime(full_path)
+                    formatted_time = datetime.fromtimestamp(mod_time).strftime('%Y-%m-%d %H:%M:%S')
+                    found_files.append((file, full_path, mod_time, formatted_time))
+                except Exception as e:
+                    print(f"Erro ao acessar o arquivo {full_path}: {e}")
+    
+    # Ordena do mais recente para o mais antigo pela data de modificação (mod_time)
+    found_files.sort(key=lambda x: x[2], reverse=True)
+    
+    return found_files
+
+# Função para abrir o arquivo selecionado
+def open_file(filepath):
+    try:
+        if os.name == 'nt':  # Windows
+            os.startfile(filepath)
+        else:
+            subprocess.call(('xdg-open', filepath))  # Linux/Mac
+    except Exception as e:
+        messagebox.showerror("Erro", f"Erro ao abrir o arquivo: {e}")
+
+# Função para preencher a treeview com os arquivos encontrados
+def populate_tree():
+    search_code = entry_code.get().strip()
+    if not search_code:
+        messagebox.showwarning("Entrada Vazia", "Por favor, insira um código para buscar.")
+        return
+    
+    for item in tree.get_children():
+        tree.delete(item)
+    
+    files = search_files(base_path, search_code)
+    if not files:
+        messagebox.showinfo("Nenhum Arquivo Encontrado", f"Nenhum arquivo encontrado com o código '{search_code}'.")
+        return
+    
+    for idx, (filename, path, mod_time, formatted_time) in enumerate(files):
+        tree.insert('', 'end', iid=idx, values=(filename, formatted_time, path))
+
+# Função ao clicar no item da lista
+def on_item_click(event):
+    selected_items = tree.selection()
+    if not selected_items:
+        return
+    selected_item = selected_items[0]
+    file_path = tree.item(selected_item, 'values')[2]
+    open_file(file_path)
+
+# Caminho base
+base_path = r"\\Fswcorp\ceic\DFEPJ\GAGIRE\22 - CARGA\arquivos_processados"
+
+# Criação da interface gráfica
+root = tk.Tk()
+root.title("Buscar Arquivos por Código")
+root.geometry("800x500")
+
+# Frame de controle para entrada de código e botão
+control_frame = ttk.Frame(root)
+control_frame.pack(pady=10, padx=10, fill=tk.X)
+
+# Label e Entry para o código de busca
+label_code = ttk.Label(control_frame, text="Código:")
+label_code.pack(side=tk.LEFT, padx=(0, 5))
+
+entry_code = ttk.Entry(control_frame, width=20)
+entry_code.pack(side=tk.LEFT, padx=(0, 10))
+entry_code.bind("<Return>", lambda event: populate_tree())  # Permite buscar pressionando Enter
+
+# Botão para carregar arquivos
+btn_load = ttk.Button(control_frame, text="Buscar Arquivos", command=populate_tree)
+btn_load.pack(side=tk.LEFT)
+
+# Frame para Treeview e Scrollbar
+tree_frame = ttk.Frame(root)
+tree_frame.pack(pady=10, padx=10, fill=tk.BOTH, expand=True)
+
+# Scrollbar vertical
+tree_scroll = ttk.Scrollbar(tree_frame, orient=tk.VERTICAL)
+tree_scroll.pack(side=tk.RIGHT, fill=tk.Y)
+
+# Scrollbar horizontal
+tree_scroll_x = ttk.Scrollbar(tree_frame, orient=tk.HORIZONTAL)
+tree_scroll_x.pack(side=tk.BOTTOM, fill=tk.X)
+
+# Treeview para listar os arquivos encontrados
+columns = ('Nome do Arquivo', 'Data de Modificação', 'Caminho Completo')
+tree = ttk.Treeview(tree_frame, columns=columns, show='headings',
+                    yscrollcommand=tree_scroll.set, xscrollcommand=tree_scroll_x.set)
+tree.heading('Nome do Arquivo', text='Nome do Arquivo')
+tree.heading('Data de Modificação', text='Data de Modificação')
+tree.heading('Caminho Completo', text='Caminho Completo')
+
+tree.column('Nome do Arquivo', width=250, anchor='w')
+tree.column('Data de Modificação', width=150, anchor='center')
+tree.column('Caminho Completo', width=400, anchor='w')
+
+tree.pack(fill=tk.BOTH, expand=True)
+
+# Configuração das scrollbars
+tree_scroll.config(command=tree.yview)
+tree_scroll_x.config(command=tree.xview)
+
+# Bind para detectar duplo clique no item da lista
+tree.bind("<Double-1>", on_item_click)
+
+# Iniciar a interface
+root.mainloop()
+
+
+
+
+
+
+
+
+
+
+import os
+import tkinter as tk
+from tkinter import messagebox
 from tkinter import ttk
 import subprocess
 from datetime import datetime
@@ -9,12 +140,12 @@ from datetime import datetime
 # Caminho base
 base_path = r"\\Fswcorp\ceic\DFEPJ\GAGIRE\22 - CARGA\arquivos_processados"
 
-# Função para buscar arquivos com "8034" no nome e ordenar pela data de modificação
-def search_files():
+# Função para buscar arquivos com o código fornecido no nome e ordenar pela data de modificação
+def search_files(code):
     found_files = []
     for root, dirs, files in os.walk(base_path):
         for file in files:
-            if "8034" in file and file.endswith(".txt"):
+            if code in file and file.endswith(".txt"):
                 full_path = os.path.join(root, file)
                 mod_time = os.path.getmtime(full_path)
                 formatted_time = datetime.fromtimestamp(mod_time).strftime('%Y-%m-%d %H:%M:%S')
@@ -37,10 +168,19 @@ def open_file(filepath):
 
 # Função para preencher a treeview com os arquivos encontrados
 def populate_tree():
+    code = entry_code.get()
+    if not code:
+        messagebox.showwarning("Aviso", "Por favor, insira um código para buscar.")
+        return
+    
     for item in tree.get_children():
         tree.delete(item)
     
-    files = search_files()
+    files = search_files(code)
+    if not files:
+        messagebox.showinfo("Informação", "Nenhum arquivo encontrado com o código fornecido.")
+        return
+    
     for idx, (filename, path, mod_time, formatted_time) in enumerate(files):
         tree.insert('', 'end', iid=idx, values=(filename, formatted_time, path))
 
@@ -52,20 +192,27 @@ def on_item_click(event):
 
 # Criação da interface gráfica
 root = tk.Tk()
-root.title("Buscar Arquivos 8034")
-root.geometry("700x400")
+root.title("Buscar Arquivos por Código")
+root.geometry("700x450")
 
 # Frame de controle
 frame = ttk.Frame(root)
-frame.pack(pady=20)
+frame.pack(pady=10)
+
+# Rótulo e campo de entrada para o código
+label_code = ttk.Label(frame, text="Código a buscar:")
+label_code.grid(row=0, column=0, padx=5)
+
+entry_code = ttk.Entry(frame, width=20)
+entry_code.grid(row=0, column=1, padx=5)
 
 # Botão para carregar arquivos
 btn_load = ttk.Button(frame, text="Buscar Arquivos", command=populate_tree)
-btn_load.pack()
+btn_load.grid(row=0, column=2, padx=5)
 
 # Frame para Treeview e Scrollbar
 tree_frame = ttk.Frame(root)
-tree_frame.pack(fill=tk.BOTH, expand=True)
+tree_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
 # Scrollbar vertical
 tree_scroll = ttk.Scrollbar(tree_frame)
