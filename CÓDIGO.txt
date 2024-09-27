@@ -1,78 +1,65 @@
 import os
+from tkinter import Tk, Listbox, Button, Label, END, Scrollbar, filedialog, messagebox
 from datetime import datetime
 
-# Caminho do diretório principal
-base_path = r"\\Fswcorp\ceic\DFEPJ\GAGIRE\22 - CARGA\arquivos_processados"
+def listar_pastas_arquivos(caminho):
+    """Lista arquivos e pastas do caminho selecionado."""
+    try:
+        lista_pastas_arquivos.delete(0, END)
+        for item in os.listdir(caminho):
+            item_path = os.path.join(caminho, item)
+            data_mod = os.path.getmtime(item_path)
+            data_mod_formatada = datetime.fromtimestamp(data_mod).strftime('%Y-%m-%d %H:%M:%S')
+            
+            if os.path.isdir(item_path):
+                lista_pastas_arquivos.insert(END, f"Pasta: {item} (Modificada: {data_mod_formatada})")
+            else:
+                lista_pastas_arquivos.insert(END, f"Arquivo: {item} (Modificado: {data_mod_formatada})")
+    except Exception as e:
+        messagebox.showerror("Erro", f"Ocorreu um erro: {e}")
 
-# Lista os nomes das pastas
-pasta_nomes = ['cadastros', 'forcados', 'metas', 'Tombamentos', 'vps']
+def selecionar_pasta():
+    """Abre a janela de seleção de pasta."""
+    caminho = filedialog.askdirectory()
+    if caminho:
+        caminho_selecionado.set(caminho)
+        listar_pastas_arquivos(caminho)
 
-def listar_pastas(base_path):
-    """Lista apenas as pastas e subpastas com datas de modificação."""
-    for root, dirs, _ in os.walk(base_path):
-        print(f"\nDiretório: {root}")
-        
-        # Data de modificação do diretório
-        data_mod_pasta = os.path.getmtime(root)
-        data_mod_pasta_formatada = datetime.fromtimestamp(data_mod_pasta).strftime('%Y-%m-%d %H:%M:%S')
-        print(f"Data de modificação da pasta: {data_mod_pasta_formatada}")
-        
-        # Subpastas
-        for d in dirs:
-            subpasta_path = os.path.join(root, d)
-            data_mod_subpasta = os.path.getmtime(subpasta_path)
-            data_mod_subpasta_formatada = datetime.fromtimestamp(data_mod_subpasta).strftime('%Y-%m-%d %H:%M:%S')
-            print(f"  Subpasta: {d} (Modificada em: {data_mod_subpasta_formatada})")
-
-def listar_arquivos(base_path):
-    """Lista apenas os arquivos com datas de modificação."""
-    for root, _, files in os.walk(base_path):
-        print(f"\nDiretório: {root}")
-        
-        # Arquivos
-        for f in files:
-            arquivo_path = os.path.join(root, f)
-            data_mod_arquivo = os.path.getmtime(arquivo_path)
-            data_mod_arquivo_formatada = datetime.fromtimestamp(data_mod_arquivo).strftime('%Y-%m-%d %H:%M:%S')
-            print(f"  Arquivo: {f} (Modificado em: {data_mod_arquivo_formatada})")
-
-def acessar_escolha(base_path):
-    """Menu interativo para o usuário escolher o que acessar."""
-    while True:
-        print("\nEscolha o que deseja fazer:")
-        print("1 - Listar apenas pastas e subpastas")
-        print("2 - Listar apenas arquivos")
-        print("3 - Sair")
-        
-        escolha = input("Digite o número da sua escolha: ")
-        
-        if escolha == '1':
-            listar_pastas(base_path)
-        elif escolha == '2':
-            listar_arquivos(base_path)
-        elif escolha == '3':
-            print("Saindo...")
-            break
-        else:
-            print("Escolha inválida. Tente novamente.")
-
-# Menu inicial para o usuário escolher a pasta principal
-while True:
-    print("\nEscolha a pasta principal para acessar:")
-    for idx, pasta in enumerate(pasta_nomes, 1):
-        print(f"{idx} - {pasta}")
-    print("6 - Sair")
-    
-    opcao = input("Digite o número da pasta que deseja acessar: ")
-    
-    if opcao.isdigit() and 1 <= int(opcao) <= 5:
-        caminho_escolhido = os.path.join(base_path, pasta_nomes[int(opcao) - 1])
-        if os.path.exists(caminho_escolhido):
-            acessar_escolha(caminho_escolhido)
-        else:
-            print(f"A pasta {pasta_nomes[int(opcao) - 1]} não existe no caminho fornecido.")
-    elif opcao == '6':
-        print("Saindo...")
-        break
+def exibir_detalhes():
+    """Exibe os detalhes da pasta ou arquivo selecionado."""
+    selecao = lista_pastas_arquivos.curselection()
+    if selecao:
+        item_selecionado = lista_pastas_arquivos.get(selecao)
+        messagebox.showinfo("Detalhes", item_selecionado)
     else:
-        print("Opção inválida. Tente novamente.")
+        messagebox.showwarning("Atenção", "Nenhum item foi selecionado.")
+
+# Criando a janela principal
+janela = Tk()
+janela.title("Explorador de Pastas e Arquivos")
+janela.geometry("600x400")
+
+# Label para o caminho da pasta
+caminho_selecionado = Label(janela, text="Selecione uma pasta:")
+caminho_selecionado.pack(pady=10)
+
+# Botão para selecionar a pasta
+btn_selecionar_pasta = Button(janela, text="Selecionar Pasta", command=selecionar_pasta)
+btn_selecionar_pasta.pack(pady=10)
+
+# Listbox para exibir as pastas e arquivos
+lista_pastas_arquivos = Listbox(janela, width=80, height=15)
+lista_pastas_arquivos.pack(pady=10)
+
+# Scrollbar para a lista
+scrollbar = Scrollbar(janela)
+scrollbar.pack(side="right", fill="y")
+lista_pastas_arquivos.config(yscrollcommand=scrollbar.set)
+scrollbar.config(command=lista_pastas_arquivos.yview)
+
+# Botão para exibir detalhes
+btn_exibir_detalhes = Button(janela, text="Exibir Detalhes", command=exibir_detalhes)
+btn_exibir_detalhes.pack(pady=10)
+
+# Executa a janela
+janela.mainloop()
