@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import messagebox, filedialog
 from tkinter import ttk
 from datetime import datetime
+import subprocess
 
 # Função para buscar arquivos com o código no nome e ordenar pela data de modificação
 def search_files(base_path, search_code):
@@ -27,10 +28,11 @@ def search_files(base_path, search_code):
 def open_file(filepath):
     try:
         if os.path.exists(filepath):
+            # Tenta abrir o arquivo usando o programa padrão
             if os.name == 'nt':  # Windows
                 os.startfile(filepath)
             else:  # Linux/Mac
-                subprocess.call(['xdg-open', filepath])
+                subprocess.Popen(['xdg-open', filepath])
         else:
             messagebox.showerror("Erro", f"O arquivo não foi encontrado: {filepath}")
     except Exception as e:
