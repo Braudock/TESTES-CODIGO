@@ -1,0 +1,78 @@
+import os
+from datetime import datetime
+
+# Caminho do diretório principal
+base_path = r"\\Fswcorp\ceic\DFEPJ\GAGIRE\22 - CARGA\arquivos_processados"
+
+# Lista os nomes das pastas
+pasta_nomes = ['cadastros', 'forcados', 'metas', 'Tombamentos', 'vps']
+
+def listar_pastas(base_path):
+    """Lista apenas as pastas e subpastas com datas de modificação."""
+    for root, dirs, _ in os.walk(base_path):
+        print(f"\nDiretório: {root}")
+        
+        # Data de modificação do diretório
+        data_mod_pasta = os.path.getmtime(root)
+        data_mod_pasta_formatada = datetime.fromtimestamp(data_mod_pasta).strftime('%Y-%m-%d %H:%M:%S')
+        print(f"Data de modificação da pasta: {data_mod_pasta_formatada}")
+        
+        # Subpastas
+        for d in dirs:
+            subpasta_path = os.path.join(root, d)
+            data_mod_subpasta = os.path.getmtime(subpasta_path)
+            data_mod_subpasta_formatada = datetime.fromtimestamp(data_mod_subpasta).strftime('%Y-%m-%d %H:%M:%S')
+            print(f"  Subpasta: {d} (Modificada em: {data_mod_subpasta_formatada})")
+
+def listar_arquivos(base_path):
+    """Lista apenas os arquivos com datas de modificação."""
+    for root, _, files in os.walk(base_path):
+        print(f"\nDiretório: {root}")
+        
+        # Arquivos
+        for f in files:
+            arquivo_path = os.path.join(root, f)
+            data_mod_arquivo = os.path.getmtime(arquivo_path)
+            data_mod_arquivo_formatada = datetime.fromtimestamp(data_mod_arquivo).strftime('%Y-%m-%d %H:%M:%S')
+            print(f"  Arquivo: {f} (Modificado em: {data_mod_arquivo_formatada})")
+
+def acessar_escolha(base_path):
+    """Menu interativo para o usuário escolher o que acessar."""
+    while True:
+        print("\nEscolha o que deseja fazer:")
+        print("1 - Listar apenas pastas e subpastas")
+        print("2 - Listar apenas arquivos")
+        print("3 - Sair")
+        
+        escolha = input("Digite o número da sua escolha: ")
+        
+        if escolha == '1':
+            listar_pastas(base_path)
+        elif escolha == '2':
+            listar_arquivos(base_path)
+        elif escolha == '3':
+            print("Saindo...")
+            break
+        else:
+            print("Escolha inválida. Tente novamente.")
+
+# Menu inicial para o usuário escolher a pasta principal
+while True:
+    print("\nEscolha a pasta principal para acessar:")
+    for idx, pasta in enumerate(pasta_nomes, 1):
+        print(f"{idx} - {pasta}")
+    print("6 - Sair")
+    
+    opcao = input("Digite o número da pasta que deseja acessar: ")
+    
+    if opcao.isdigit() and 1 <= int(opcao) <= 5:
+        caminho_escolhido = os.path.join(base_path, pasta_nomes[int(opcao) - 1])
+        if os.path.exists(caminho_escolhido):
+            acessar_escolha(caminho_escolhido)
+        else:
+            print(f"A pasta {pasta_nomes[int(opcao) - 1]} não existe no caminho fornecido.")
+    elif opcao == '6':
+        print("Saindo...")
+        break
+    else:
+        print("Opção inválida. Tente novamente.")
