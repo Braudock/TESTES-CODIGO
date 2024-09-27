@@ -1,6 +1,6 @@
 import os
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, filedialog
 from tkinter import ttk
 import subprocess
 from datetime import datetime
@@ -29,8 +29,8 @@ def open_file(filepath):
     try:
         if os.name == 'nt':  # Windows
             os.startfile(filepath)
-        else:  # Linux ou Mac
-            subprocess.run(['xdg-open', filepath], check=True)
+        else:
+            subprocess.call(('xdg-open', filepath))  # Linux/Mac
     except Exception as e:
         messagebox.showerror("Erro", f"Erro ao abrir o arquivo: {e}")
 
@@ -61,6 +61,14 @@ def on_item_click(event):
     file_path = tree.item(selected_item, 'values')[2]
     open_file(file_path)
 
+# Função para escolher a pasta de busca
+def choose_directory():
+    global base_path
+    selected_directory = filedialog.askdirectory(initialdir=base_path)
+    if selected_directory:
+        base_path = selected_directory
+        label_directory.config(text=f"Pasta atual: {base_path}")
+
 # Caminho base
 base_path = r"\\Fswcorp\ceic\DFEPJ\GAGIRE\22 - CARGA\arquivos_processados"
 
@@ -84,6 +92,14 @@ entry_code.bind("<Return>", lambda event: populate_tree())  # Permite buscar pre
 # Botão para carregar arquivos
 btn_load = ttk.Button(control_frame, text="Buscar Arquivos", command=populate_tree)
 btn_load.pack(side=tk.LEFT)
+
+# Botão para escolher a pasta
+btn_choose_directory = ttk.Button(control_frame, text="Escolher Pasta", command=choose_directory)
+btn_choose_directory.pack(side=tk.LEFT, padx=(10, 0))
+
+# Label para mostrar a pasta atual
+label_directory = ttk.Label(control_frame, text=f"Pasta atual: {base_path}")
+label_directory.pack(side=tk.LEFT, padx=(10, 0))
 
 # Frame para Treeview e Scrollbar
 tree_frame = ttk.Frame(root)
