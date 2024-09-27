@@ -31,11 +31,9 @@ def open_file(filepath):
         if not os.path.exists(filepath):
             messagebox.showerror("Erro", f"O arquivo não foi encontrado: {filepath}")
             return
-        
-        if os.name == 'nt':  # Windows
-            os.startfile(filepath)
-        else:
-            subprocess.call(('xdg-open', filepath))  # Linux/Mac
+
+        # Usando subprocess para abrir o arquivo
+        subprocess.Popen(['start', '', filepath], shell=True)
     except Exception as e:
         messagebox.showerror("Erro", f"Erro ao abrir o arquivo: {e}")
 
