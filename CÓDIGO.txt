@@ -63,3 +63,5 @@ btn_exibir_detalhes.pack(pady=10)
 
 # Executa a janela
 janela.mainloop()
+
+d
