@@ -2,6 +2,7 @@ import os
 import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk
+from tkinter import filedialog
 import subprocess
 from datetime import datetime
 
@@ -41,6 +42,11 @@ def populate_tree():
         messagebox.showwarning("Entrada Vazia", "Por favor, insira um código para buscar.")
         return
     
+    base_path = entry_path.get().strip()
+    if not os.path.exists(base_path):
+        messagebox.showwarning("Caminho Inválido", "O caminho especificado não existe.")
+        return
+    
     for item in tree.get_children():
         tree.delete(item)
     
@@ -52,6 +58,13 @@ def populate_tree():
     for idx, (filename, path, mod_time, formatted_time) in enumerate(files):
         tree.insert('', 'end', iid=idx, values=(filename, formatted_time, path))
 
+# Função para abrir o explorador de arquivos e escolher a pasta
+def choose_directory():
+    directory = filedialog.askdirectory(initialdir=base_path)
+    if directory:
+        entry_path.delete(0, tk.END)  # Limpa a entrada atual
+        entry_path.insert(0, directory)  # Insere o novo caminho
+
 # Função ao clicar no item da lista
 def on_item_click(event):
     selected_items = tree.selection()
@@ -61,7 +74,7 @@ def on_item_click(event):
     file_path = tree.item(selected_item, 'values')[2]
     open_file(file_path)
 
-# Caminho base
+# Caminho base inicial
 base_path = r"\\Fswcorp\ceic\DFEPJ\GAGIRE\22 - CARGA\arquivos_processados"
 
 # Criação da interface gráfica
@@ -80,6 +93,17 @@ label_code.pack(side=tk.LEFT, padx=(0, 5))
 entry_code = ttk.Entry(control_frame, width=20)
 entry_code.pack(side=tk.LEFT, padx=(0, 10))
 entry_code.bind("<Return>", lambda event: populate_tree())  # Permite buscar pressionando Enter
+
+# Label e Entry para o caminho da pasta
+label_path = ttk.Label(control_frame, text="Pasta:")
+label_path.pack(side=tk.LEFT, padx=(10, 5))
+
+entry_path = ttk.Entry(control_frame, width=40)
+entry_path.pack(side=tk.LEFT, padx=(0, 5))
+
+# Botão para escolher o diretório
+btn_choose = ttk.Button(control_frame, text="Escolher Pasta", command=choose_directory)
+btn_choose.pack(side=tk.LEFT, padx=(0, 10))
 
 # Botão para carregar arquivos
 btn_load = ttk.Button(control_frame, text="Buscar Arquivos", command=populate_tree)
