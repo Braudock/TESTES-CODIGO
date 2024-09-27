@@ -1,6 +1,3 @@
-pip install tk
-
-
 import os
 import tkinter as tk
 from tkinter import filedialog, messagebox
@@ -31,30 +28,22 @@ def procurar_arquivos_txt(caminho, codigo):
 
 # Função chamada ao clicar no botão de busca
 def buscar_arquivo():
-    caminho = filedialog.askdirectory()
-    if caminho:
-        codigo = entry_codigo.get()
-        if codigo:
-            resultado = procurar_arquivos_txt(caminho, codigo)
-            if resultado:
-                messagebox.showinfo("Arquivo encontrado", f"O último arquivo modificado que contém o código foi encontrado:\n{resultado}")
-            else:
-                messagebox.showwarning("Aviso", "Nenhum arquivo .txt com o código especificado foi encontrado.")
-        else:
-            messagebox.showwarning("Aviso", "Por favor, insira um código para procurar.")
+    caminho = r"\\Fswcorp\ceic\DFEPJ\GAGIRE\22 - CARGA\arquivos_processados"  # Caminho já especificado
+    codigo = "3411"  # Código especificado
+    
+    resultado = procurar_arquivos_txt(caminho, codigo)
+    if resultado:
+        messagebox.showinfo("Arquivo encontrado", f"O último arquivo modificado que contém o código foi encontrado:\n{resultado}")
     else:
-        messagebox.showwarning("Aviso", "Por favor, selecione um diretório.")
+        messagebox.showwarning("Aviso", "Nenhum arquivo .txt com o código especificado foi encontrado.")
 
 # Cria a interface gráfica
 root = tk.Tk()
 root.title("Buscar Arquivos .txt")
 
-# Label e campo de texto para inserir o código a ser procurado
-label_codigo = tk.Label(root, text="Digite o código a ser procurado:")
-label_codigo.pack(pady=5)
-
-entry_codigo = tk.Entry(root, width=50)
-entry_codigo.pack(pady=5)
+# Label para informar o código e caminho
+label_info = tk.Label(root, text="Procurando código '3411' em arquivos .txt no caminho:\n\\Fswcorp\\ceic\\DFEPJ\\GAGIRE\\22 - CARGA\\arquivos_processados")
+label_info.pack(pady=10)
 
 # Botão para iniciar a busca
 btn_buscar = tk.Button(root, text="Buscar Arquivo", command=buscar_arquivo)
