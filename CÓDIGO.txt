@@ -1,0 +1,52 @@
+import pandas as pd
+import tkinter as tk
+from tkinter import filedialog, simpledialog, messagebox
+
+# Função para abrir o arquivo Excel
+def abrir_arquivo_excel():
+    # Abre o diálogo para selecionar o arquivo Excel
+    arquivo = filedialog.askopenfilename(
+        title="Selecione o arquivo Excel",
+        filetypes=[("Arquivo Excel", "*.xlsx"), ("Todos os arquivos", "*.*")]
+    )
+    if arquivo:
+        # Abre o arquivo Excel e lista as abas disponíveis
+        excel_data = pd.ExcelFile(arquivo)
+        abas = excel_data.sheet_names
+
+        # Pergunta ao usuário qual aba ele quer selecionar
+        aba_escolhida = simpledialog.askstring(
+            "Seleção de Aba", f"Escolha a aba:\n{', '.join(abas)}"
+        )
+        if aba_escolhida in abas:
+            # Carrega a aba escolhida
+            df = pd.read_excel(arquivo, sheet_name=aba_escolhida)
+
+            # Pergunta ao usuário o filtro de cabeçalhos
+            cabecalhos = df.columns.tolist()
+            filtro = simpledialog.askstring(
+                "Filtrar Cabeçalhos", f"Colunas disponíveis:\n{', '.join(cabecalhos)}\nDigite os cabeçalhos separados por vírgula:"
+            )
+
+            # Filtra as colunas escolhidas
+            if filtro:
+                colunas_filtradas = [col.strip() for col in filtro.split(',') if col.strip() in cabecalhos]
+                if colunas_filtradas:
+                    df_filtrado = df[colunas_filtradas]
+                    messagebox.showinfo("Colunas Filtradas", f"Colunas selecionadas:\n{', '.join(colunas_filtradas)}")
+                    print(df_filtrado)  # Você pode manipular o DataFrame como quiser
+                else:
+                    messagebox.showerror("Erro", "Nenhuma coluna válida foi selecionada.")
+        else:
+            messagebox.showerror("Erro", "A aba escolhida não existe.")
+    else:
+        messagebox.showerror("Erro", "Nenhum arquivo foi selecionado.")
+
+# Configuração da janela principal
+janela = tk.Tk()
+janela.withdraw()  # Esconde a janela principal
+
+# Chama a função para abrir o arquivo Excel
+abrir_arquivo_excel()
+
+janela.mainloop()
