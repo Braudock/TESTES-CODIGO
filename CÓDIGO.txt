@@ -1,8 +1,8 @@
 import pandas as pd
 import tkinter as tk
-from tkinter import filedialog, simpledialog, messagebox
+from tkinter import filedialog, Listbox, MULTIPLE, messagebox
 
-# Função para abrir o arquivo Excel
+# Função para abrir o arquivo Excel e selecionar a aba
 def abrir_arquivo_excel():
     # Abre o diálogo para selecionar o arquivo Excel
     arquivo = filedialog.askopenfilename(
@@ -14,33 +14,58 @@ def abrir_arquivo_excel():
         excel_data = pd.ExcelFile(arquivo)
         abas = excel_data.sheet_names
 
-        # Pergunta ao usuário qual aba ele quer selecionar
-        aba_escolhida = simpledialog.askstring(
-            "Seleção de Aba", f"Escolha a aba:\n{', '.join(abas)}"
-        )
-        if aba_escolhida in abas:
-            # Carrega a aba escolhida
-            df = pd.read_excel(arquivo, sheet_name=aba_escolhida)
+        # Cria uma nova janela para seleção de aba
+        aba_selecao = tk.Tk()
+        aba_selecao.title("Seleção de Aba")
 
-            # Pergunta ao usuário o filtro de cabeçalhos
-            cabecalhos = df.columns.tolist()
-            filtro = simpledialog.askstring(
-                "Filtrar Cabeçalhos", f"Colunas disponíveis:\n{', '.join(cabecalhos)}\nDigite os cabeçalhos separados por vírgula:"
-            )
+        # Caixa de seleção para as abas
+        lista_abas = Listbox(aba_selecao, selectmode=tk.SINGLE)
+        for aba in abas:
+            lista_abas.insert(tk.END, aba)
+        lista_abas.pack()
 
-            # Filtra as colunas escolhidas
-            if filtro:
-                colunas_filtradas = [col.strip() for col in filtro.split(',') if col.strip() in cabecalhos]
-                if colunas_filtradas:
-                    df_filtrado = df[colunas_filtradas]
-                    messagebox.showinfo("Colunas Filtradas", f"Colunas selecionadas:\n{', '.join(colunas_filtradas)}")
-                    print(df_filtrado)  # Você pode manipular o DataFrame como quiser
-                else:
-                    messagebox.showerror("Erro", "Nenhuma coluna válida foi selecionada.")
-        else:
-            messagebox.showerror("Erro", "A aba escolhida não existe.")
+        def selecionar_aba():
+            aba_escolhida = lista_abas.get(lista_abas.curselection())
+            aba_selecao.destroy()  # Fecha a janela de seleção de aba
+            carregar_dados(arquivo, aba_escolhida)
+
+        botao_selecionar = tk.Button(aba_selecao, text="Selecionar Aba", command=selecionar_aba)
+        botao_selecionar.pack()
+
+        aba_selecao.mainloop()
     else:
         messagebox.showerror("Erro", "Nenhum arquivo foi selecionado.")
+
+# Função para carregar os dados da aba selecionada e exibir os cabeçalhos
+def carregar_dados(arquivo, aba_escolhida):
+    df = pd.read_excel(arquivo, sheet_name=aba_escolhida)
+    cabecalhos = df.columns.tolist()
+
+    # Cria uma nova janela para seleção de cabeçalhos
+    janela_filtro = tk.Tk()
+    janela_filtro.title("Seleção de Cabeçalhos")
+
+    # Lista de seleção múltipla para os cabeçalhos
+    lista_cabecalhos = Listbox(janela_filtro, selectmode=MULTIPLE)
+    for cabecalho in cabecalhos:
+        lista_cabecalhos.insert(tk.END, cabecalho)
+    lista_cabecalhos.pack()
+
+    # Função para filtrar os dados com base na seleção
+    def aplicar_filtro():
+        selecao = [lista_cabecalhos.get(i) for i in lista_cabecalhos.curselection()]
+        if selecao:
+            df_filtrado = df[selecao]
+            messagebox.showinfo("Colunas Filtradas", f"Colunas selecionadas:\n{', '.join(selecao)}")
+            print(df_filtrado)  # Você pode manipular o DataFrame como quiser
+        else:
+            messagebox.showerror("Erro", "Nenhuma coluna foi selecionada.")
+        janela_filtro.destroy()
+
+    botao_filtrar = tk.Button(janela_filtro, text="Aplicar Filtro", command=aplicar_filtro)
+    botao_filtrar.pack()
+
+    janela_filtro.mainloop()
 
 # Configuração da janela principal
 janela = tk.Tk()
