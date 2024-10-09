@@ -1,77 +1,86 @@
-import pandas as pd
 import tkinter as tk
-from tkinter import filedialog, Listbox, MULTIPLE, messagebox
+from tkinter import ttk
+import pandas as pd
 
-# Função para abrir o arquivo Excel e selecionar a aba
-def abrir_arquivo_excel():
-    # Abre o diálogo para selecionar o arquivo Excel
-    arquivo = filedialog.askopenfilename(
-        title="Selecione o arquivo Excel",
-        filetypes=[("Arquivo Excel", "*.xlsx"), ("Todos os arquivos", "*.*")]
-    )
-    if arquivo:
-        # Abre o arquivo Excel e lista as abas disponíveis
-        excel_data = pd.ExcelFile(arquivo)
-        abas = excel_data.sheet_names
+# Função para carregar a planilha e exibir os dados
+def load_data(sheet_name):
+    # Carrega a planilha
+    df = pd.read_excel('caminho_para_sua_planilha.xlsx', sheet_name=sheet_name)
+    
+    # Limpa a Treeview
+    for i in tree.get_children():
+        tree.delete(i)
 
-        # Cria uma nova janela para seleção de aba
-        aba_selecao = tk.Tk()
-        aba_selecao.title("Seleção de Aba")
+    # Configura as colunas na Treeview
+    tree["columns"] = list(df.columns)
+    tree["show"] = "headings"
+    
+    for col in tree["columns"]:
+        tree.heading(col, text=col, command=lambda _col=col: sort_column(_col, False))
+        tree.column(col, width=100)
+    
+    # Insere os dados na Treeview
+    for row in df.itertuples(index=False):
+        tree.insert("", "end", values=row)
 
-        # Caixa de seleção para as abas
-        lista_abas = Listbox(aba_selecao, selectmode=tk.SINGLE)
-        for aba in abas:
-            lista_abas.insert(tk.END, aba)
-        lista_abas.pack()
+    # Filtra os dados
+    def filter_data():
+        query = search_var.get().lower()
+        filtered_df = df[df.apply(lambda row: query in row.astype(str).str.lower().to_list(), axis=1)]
+        
+        # Limpa a Treeview
+        for i in tree.get_children():
+            tree.delete(i)
+        
+        # Insere os dados filtrados
+        for row in filtered_df.itertuples(index=False):
+            tree.insert("", "end", values=row)
 
-        def selecionar_aba():
-            aba_escolhida = lista_abas.get(lista_abas.curselection())
-            aba_selecao.destroy()  # Fecha a janela de seleção de aba
-            carregar_dados(arquivo, aba_escolhida)
+    # Configura o botão de filtro
+    filter_button.config(command=filter_data)
 
-        botao_selecionar = tk.Button(aba_selecao, text="Selecionar Aba", command=selecionar_aba)
-        botao_selecionar.pack()
+# Função para ordenar as colunas
+def sort_column(col, reverse):
+    data = [(tree.set(child, col), child) for child in tree.get_children("")]
+    data.sort(reverse=reverse)
 
-        aba_selecao.mainloop()
-    else:
-        messagebox.showerror("Erro", "Nenhum arquivo foi selecionado.")
+    for index, (val, child) in enumerate(data):
+        tree.move(child, "", index)
 
-# Função para carregar os dados da aba selecionada e exibir os cabeçalhos
-def carregar_dados(arquivo, aba_escolhida):
-    df = pd.read_excel(arquivo, sheet_name=aba_escolhida)
-    cabecalhos = df.columns.tolist()
-
-    # Cria uma nova janela para seleção de cabeçalhos
-    janela_filtro = tk.Tk()
-    janela_filtro.title("Seleção de Cabeçalhos")
-
-    # Lista de seleção múltipla para os cabeçalhos
-    lista_cabecalhos = Listbox(janela_filtro, selectmode=MULTIPLE)
-    for cabecalho in cabecalhos:
-        lista_cabecalhos.insert(tk.END, cabecalho)
-    lista_cabecalhos.pack()
-
-    # Função para filtrar os dados com base na seleção
-    def aplicar_filtro():
-        selecao = [lista_cabecalhos.get(i) for i in lista_cabecalhos.curselection()]
-        if selecao:
-            df_filtrado = df[selecao]
-            messagebox.showinfo("Colunas Filtradas", f"Colunas selecionadas:\n{', '.join(selecao)}")
-            print(df_filtrado)  # Você pode manipular o DataFrame como quiser
-        else:
-            messagebox.showerror("Erro", "Nenhuma coluna foi selecionada.")
-        janela_filtro.destroy()
-
-    botao_filtrar = tk.Button(janela_filtro, text="Aplicar Filtro", command=aplicar_filtro)
-    botao_filtrar.pack()
-
-    janela_filtro.mainloop()
+    # Alterna a ordem de classificação
+    tree.heading(col, command=lambda: sort_column(col, not reverse))
 
 # Configuração da janela principal
-janela = tk.Tk()
-janela.withdraw()  # Esconde a janela principal
+root = tk.Tk()
+root.title("Visualizador de Planilha")
+root.geometry("800x400")
 
-# Chama a função para abrir o arquivo Excel
-abrir_arquivo_excel()
+# Frame para a barra de rolagem
+frame = ttk.Frame(root)
+frame.pack(fill=tk.BOTH, expand=True)
 
-janela.mainloop()
+# Barra de rolagem
+scrollbar_y = ttk.Scrollbar(frame, orient=tk.VERTICAL)
+scrollbar_x = ttk.Scrollbar(frame, orient=tk.HORIZONTAL)
+
+# Treeview para exibir a planilha
+tree = ttk.Treeview(frame, yscrollcommand=scrollbar_y.set, xscrollcommand=scrollbar_x.set)
+scrollbar_y.config(command=tree.yview)
+scrollbar_x.config(command=tree.xview)
+
+tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+scrollbar_y.pack(side=tk.RIGHT, fill=tk.Y)
+scrollbar_x.pack(side=tk.BOTTOM, fill=tk.X)
+
+# Campo de busca e botão de filtro
+search_var = tk.StringVar()
+search_entry = ttk.Entry(root, textvariable=search_var)
+search_entry.pack(side=tk.LEFT, padx=10, pady=10)
+
+filter_button = ttk.Button(root, text="Filtrar")
+filter_button.pack(side=tk.LEFT)
+
+# Carrega os dados da primeira aba (ou qualquer aba específica)
+load_data(sheet_name='Nome_da_Sua_Aba')
+
+root.mainloop()
