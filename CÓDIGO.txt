@@ -35,8 +35,7 @@ def baixar_anexo_outlook(mensagens, pasta_destino):
             # Verificar se o e-mail contém anexos
             if message.Attachments.Count > 0:
                 for anexo in message.Attachments:
-                    # Verifica se o anexo é uma planilha Excel (.xls ou .xlsx)
-                    if anexo.FileName.endswith((".xls", ".xlsx")):
+                    if anexo.FileName.endswith(".xls") or anexo.FileName.endswith(".xlsx"):
                         # Verificar se o diretório de destino existe, se não, criar
                         if not os.path.exists(pasta_destino):
                             os.makedirs(pasta_destino)  # Cria o diretório se não existir
@@ -45,7 +44,7 @@ def baixar_anexo_outlook(mensagens, pasta_destino):
                         anexo.SaveAsFile(caminho_anexo)
                         print(f"Anexo {anexo.FileName} salvo em {caminho_anexo}")
 
-                        # Filtrar e mostrar colunas necessárias
+                        # Filtrar dados da planilha e excluir a original
                         caminho_filtrado = filtrar_planilha(caminho_anexo)
                         if caminho_filtrado:
                             mostrar_informacoes(caminho_filtrado)  # Mostrar informações após filtrar
@@ -62,9 +61,8 @@ def filtrar_planilha(caminho_anexo):
     try:
         df = pd.read_excel(caminho_anexo)
 
-        # Manter apenas as colunas que você mencionou
-        colunas_necessarias = ['N ocorrência', 'Abertura', 'Vencimento', 'Responsável Abertura', 'Descrição']
-        df_filtrado = df[colunas_necessarias]
+        # Filtrar apenas as linhas onde o cabeçalho 'Assunto' contém 'AGIR'
+        df_filtrado = df[df['Assunto'].str.contains('AGIR', na=False)]
 
         # Definir o caminho para salvar a nova planilha
         novo_caminho = os.path.splitext(caminho_anexo)[0] + '_filtrado.xlsx'
@@ -114,19 +112,17 @@ def mostrar_informacoes(caminho_filtrado):
             tree.heading(col, text=col)
             # Ajustar a largura das colunas conforme mencionado
             if col == "Descrição":
-                tree.column(col, anchor="w", width=2000)  # Aumentar ainda mais a largura da coluna 'Descrição'
+                tree.column(col, anchor="w", width=2000)  # Aumentar bastante a largura da coluna 'Descrição'
             else:
-                tree.column(col, anchor="w", width=250)  # Largura das outras colunas
+                tree.column(col, anchor="w", width=200)  # Largura das outras colunas
 
-        # Preencher a tabela com os dados
+        # Preencher a
+# Preencher a tabela com os dados
         for _, row in df.iterrows():
             tree.insert("", "end", values=(row["N ocorrência"], row["Abertura"], row["Vencimento"], row["Responsável Abertura"], row["Descrição"]))
 
-        # Ajustar a quebra automática de linha (word wrap) na coluna "Descrição"
-        tree.tag_configure('wrap', wraplength=2000, justify='left')
-
-        # Exibir a janela com uma largura e altura maiores para a coluna "Descrição"
-        root.geometry("2200x1000")  # Ajustar o tamanho da janela para melhor visualização
+        # Ajustar o tamanho da janela para melhor visualização
+        root.geometry("2200x1000")  # Tamanho maior para visualizar todas as colunas e o conteúdo da coluna 'Descrição'
         root.mainloop()
 
     except Exception as e:
