@@ -1,11 +1,11 @@
 import os
-import csv
 import tkinter as tk
 from tkinter import messagebox, filedialog
 from tkinter import ttk
 import subprocess
 from datetime import datetime
-import tkinter.font as tkFont  # Importando tkinter.font
+import tkinter.font as tkFont
+from openpyxl import Workbook  # Importando a biblioteca openpyxl
 
 # Função para buscar arquivos com o(s) código(s) no nome e ordenar pela data de modificação
 def search_files(base_paths, search_codes, specific_path):
@@ -80,8 +80,8 @@ def select_base_paths():
         base_paths.append(folder_selected)
         label_base_paths.config(text="Caminhos base: " + ", ".join(base_paths))
 
-# Função para exportar dados da Treeview para um arquivo CSV
-def export_to_csv():
+# Função para exportar dados da Treeview para um arquivo Excel
+def export_to_excel():
     files = []
     for item in tree.get_children():
         files.append(tree.item(item, 'values'))
@@ -90,13 +90,18 @@ def export_to_csv():
         messagebox.showwarning("Exportação", "Nenhum dado para exportar.")
         return
     
-    save_path = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV files", "*.csv")])
+    save_path = filedialog.asksaveasfilename(defaultextension=".xlsx", filetypes=[("Excel files", "*.xlsx")])
     if save_path:
         try:
-            with open(save_path, mode='w', newline='', encoding='utf-8') as file:
-                writer = csv.writer(file)
-                writer.writerow(["Nome do Arquivo", "Data de Modificação", "Caminho Completo"])  # Cabeçalho
-                writer.writerows(files)  # Dados
+            wb = Workbook()
+            ws = wb.active
+            ws.title = "Arquivos Encontrados"
+            # Adiciona cabeçalho
+            ws.append(["Nome do Arquivo", "Data de Modificação", "Caminho Completo"])
+            # Adiciona dados
+            for file in files:
+                ws.append(file)
+            wb.save(save_path)  # Salva o arquivo
             messagebox.showinfo("Exportação", "Dados exportados com sucesso!")
         except Exception as e:
             messagebox.showerror("Erro", f"Erro ao exportar os dados: {e}")
@@ -139,7 +144,7 @@ btn_load = ttk.Button(control_frame, text="Buscar Arquivos", command=populate_tr
 btn_load.pack(side=tk.LEFT)
 
 # Botão para exportar dados
-btn_export = ttk.Button(control_frame, text="Exportar CSV", command=export_to_csv)
+btn_export = ttk.Button(control_frame, text="Exportar Excel", command=export_to_excel)
 btn_export.pack(side=tk.LEFT)
 
 # Frame para Treeview e Scrollbar
