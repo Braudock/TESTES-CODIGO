@@ -1,52 +1,42 @@
-pip install pywin32
-
 import win32com.client
 import os
-from datetime import datetime
 
 def baixar_anexo_outlook(pasta_destino):
-    # Acessar o aplicativo do Outlook
-    outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
-    
-    # Acessar a caixa de entrada
-    inbox = outlook.Folders.Item("Caixa de Entrada")
-    
-    # Filtrar e-mails da caixa de entrada
-    mensagens = inbox.Items
-    
-    # Filtrar por e-mails com o assunto 'indicadores central de atendimento'
-    filtro_assunto = "indicadores central de atendimento"
-    
-    # Ordenar as mensagens por data (mais recente primeiro)
-    mensagens = mensagens.Restrict(f"[Subject] = '{filtro_assunto}'")
-    mensagens.Sort("[ReceivedTime]", True)
+    try:
+        # Acessar o aplicativo do Outlook
+        outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
+        
+        # Tente acessar a caixa de entrada (pode ser necessário ajustar para "Inbox")
+        inbox = outlook.Folders.Item("Caixa de Entrada")  # Ou use "Inbox" se for em inglês
 
-    # Verificar se encontrou algum e-mail
-    if mensagens.Count == 0:
-        print("Nenhum e-mail encontrado com o assunto especificado.")
-        return
+        # Filtrar e-mails da caixa de entrada
+        mensagens = inbox.Items
+        filtro_assunto = "indicadores central de atendimento"
+        
+        # Filtrar por e-mails com o assunto 'indicadores central de atendimento'
+        mensagens = mensagens.Restrict(f"[Subject] = '{filtro_assunto}'")
+        mensagens.Sort("[ReceivedTime]", True)
 
-    # Pegar o e-mail mais recente
-    email = mensagens.Item(1)
-    
-    # Exibir informações do e-mail
-    print(f"Último e-mail encontrado:\nAssunto: {email.Subject}\nRecebido em: {email.ReceivedTime}")
+        if mensagens.Count == 0:
+            print("Nenhum e-mail encontrado com o assunto especificado.")
+            return
 
-    # Verificar se o e-mail contém anexos
-    if email.Attachments.Count > 0:
-        for anexo in email.Attachments:
-            # Verificar se o anexo é uma planilha
-            if anexo.FileName.endswith(".xls") or anexo.FileName.endswith(".xlsx"):
-                # Caminho de destino para salvar o anexo
-                caminho_anexo = os.path.join(pasta_destino, anexo.FileName)
-                
-                # Salvar o anexo no caminho especificado
-                anexo.SaveAsFile(caminho_anexo)
-                print(f"Anexo {anexo.FileName} salvo em {caminho_anexo}")
-            else:
-                print(f"Anexo {anexo.FileName} não é uma planilha.")
-    else:
-        print("Este e-mail não contém anexos.")
+        email = mensagens.Item(1)
+        print(f"Último e-mail encontrado:\nAssunto: {email.Subject}\nRecebido em: {email.ReceivedTime}")
+
+        if email.Attachments.Count > 0:
+            for anexo in email.Attachments:
+                if anexo.FileName.endswith(".xls") or anexo.FileName.endswith(".xlsx"):
+                    caminho_anexo = os.path.join(pasta_destino, anexo.FileName)
+                    anexo.SaveAsFile(caminho_anexo)
+                    print(f"Anexo {anexo.FileName} salvo em {caminho_anexo}")
+                else:
+                    print(f"Anexo {anexo.FileName} não é uma planilha.")
+        else:
+            print("Este e-mail não contém anexos.")
+
+    except Exception as e:
+        print(f"Ocorreu um erro: {str(e)}")
 
 # Definir o caminho onde a planilha será salva
 pasta_destino = r'C:\caminho\para\salvar\anexo'
