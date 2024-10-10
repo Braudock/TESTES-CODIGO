@@ -16,6 +16,14 @@ def listar_mensagens():
     # Ordenar as mensagens por data de recebimento (mais recentes primeiro)
     messages.Sort("[ReceivedTime]", True)
 
+    # Exibir informações sobre as mensagens
+    for message in messages:
+        print("Assunto:", message.Subject)
+        print("Data de Recebimento:", message.ReceivedTime)
+        print("Remetente:", message.SenderName)
+        print("Corpo:", message.Body)
+        print("-" * 40)  # Linha separadora
+
     return messages
 
 def baixar_anexo_outlook(mensagens, pasta_destino):
@@ -91,7 +99,7 @@ def mostrar_informacoes(caminho_filtrado):
 
         # Cria um frame para a tabela
         frame = tk.Frame(root)
-        frame.pack(padx=10, pady=10)
+        frame.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
 
         # Cria uma Treeview para mostrar os dados em formato de tabela
         tree = ttk.Treeview(frame, columns=["N ocorrência", "Abertura", "Vencimento", "Responsável Abertura", "Descrição"], show="headings")
@@ -116,13 +124,13 @@ def mostrar_informacoes(caminho_filtrado):
             else:
                 tree.column(col, anchor="w", width=200)  # Largura das outras colunas
 
-        # Preencher a
-# Preencher a tabela com os dados
+        # Preencher a tabela com os dados
         for _, row in df.iterrows():
             tree.insert("", "end", values=(row["N ocorrência"], row["Abertura"], row["Vencimento"], row["Responsável Abertura"], row["Descrição"]))
 
-        # Ajustar o tamanho da janela para melhor visualização
-        root.geometry("2200x1000")  # Tamanho maior para visualizar todas as colunas e o conteúdo da coluna 'Descrição'
+        # Ajustar o tamanho da janela para o máximo possível
+        root.geometry(f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}")  # Tamanho máximo da janela
+        root.state('zoomed')  # Maximiza a janela para ocupar toda a tela
         root.mainloop()
 
     except Exception as e:
