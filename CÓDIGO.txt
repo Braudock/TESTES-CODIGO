@@ -57,13 +57,6 @@ def populate_tree():
     for idx, (filename, path, mod_time, formatted_time) in enumerate(files):
         tree.insert('', 'end', iid=idx, values=(filename, formatted_time, path))
 
-    # Ajusta o tamanho das colunas conforme o conteúdo
-    for col in tree['columns']:
-        tree.column(col, width=tk.font.Font().measure(col) + 20)
-        for item in tree.get_children():
-            text = tree.item(item, 'values')[tree['columns'].index(col)]
-            tree.column(col, width=max(tree.column(col, 'width'), tk.font.Font().measure(text) + 20))
-
 # Função ao clicar no item da lista
 def on_item_click(event):
     selected_items = tree.selection()
