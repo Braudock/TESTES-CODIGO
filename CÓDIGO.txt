@@ -120,7 +120,7 @@ def mostrar_informacoes(caminho_filtrado):
             tree.heading(col, text=col)
             # Ajustar a largura das colunas conforme mencionado
             if col == "Descrição":
-                tree.column(col, anchor="w", width=1000)  # Aumentar bastante a largura da coluna 'Descrição'
+                tree.column(col, anchor="w", width=1300)  # Aumentar bastante a largura da coluna 'Descrição'
             else:
                 tree.column(col, anchor="w", width=200)  # Largura das outras colunas
 
@@ -129,7 +129,7 @@ def mostrar_informacoes(caminho_filtrado):
             tree.insert("", "end", values=(row["N ocorrência"], row["Abertura"], row["Vencimento"], row["Responsável Abertura"], row["Descrição"]))
 
         # Exibir a janela
-        root.geometry("1600x700")  # Ajustar o tamanho da janela para melhor visualização
+        root.geometry("1800x800")  # Ajustar o tamanho da janela para melhor visualização
         root.mainloop()
 
     except Exception as e:
