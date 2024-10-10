@@ -1,6 +1,8 @@
 import win32com.client
 import os
 import pandas as pd
+import tkinter as tk
+from tkinter import scrolledtext
 
 def listar_mensagens():
     # Acessar o aplicativo do Outlook
@@ -51,7 +53,8 @@ def baixar_anexo_outlook(mensagens, pasta_destino):
                         print(f"Anexo {anexo.FileName} salvo em {caminho_anexo}")
 
                         # Filtrar dados da planilha e excluir a original
-                        filtrar_planilha(caminho_anexo)
+                        caminho_filtrado = filtrar_planilha(caminho_anexo)
+                        mostrar_informacoes(caminho_filtrado)  # Mostrar informações após filtrar
                     else:
                         print(f"Anexo {anexo.FileName} não é uma planilha.")
             else:
@@ -78,8 +81,39 @@ def filtrar_planilha(caminho_anexo):
         os.remove(caminho_anexo)
         print(f"Planilha original excluída: {caminho_anexo}")
 
+        return novo_caminho  # Retorna o caminho da planilha filtrada
+
     except Exception as e:
         print(f"Ocorreu um erro ao filtrar a planilha: {str(e)}")
+        return None
+
+def mostrar_informacoes(caminho_filtrado):
+    # Ler a planilha filtrada e exibir as informações em uma caixa de diálogo
+    try:
+        df = pd.read_excel(caminho_filtrado)
+
+        # Cria a janela principal
+        root = tk.Tk()
+        root.title("Informações Filtradas")
+
+        # Cria um campo de texto rolável
+        text_area = scrolledtext.ScrolledText(root, width=80, height=20)
+        text_area.pack(padx=10, pady=10)
+
+        # Cabeçalhos
+        cabeçalhos = ["N ocorrência", "Abertura", "Vencimento", "Responsável Abertura", "Descrição"]
+        text_area.insert(tk.END, "\t".join(cabeçalhos) + "\n")
+
+        # Preencher as informações
+        for _, row in df.iterrows():
+            linha = f"{row['N ocorrência']}\t{row['Abertura']}\t{row['Vencimento']}\t{row['Responsável Abertura']}\t{row['Descrição']}\n"
+            text_area.insert(tk.END, linha)
+
+        # Exibir a janela
+        root.mainloop()
+
+    except Exception as e:
+        print(f"Ocorreu um erro ao mostrar as informações: {str(e)}")
 
 # Definir o caminho onde a planilha será salva
 pasta_destino = r'C:\caminho\para\salvar\anexo'  # Altere para o caminho desejado
