@@ -120,16 +120,19 @@ def mostrar_informacoes(caminho_filtrado):
             tree.heading(col, text=col)
             # Ajustar a largura das colunas conforme mencionado
             if col == "Descrição":
-                tree.column(col, anchor="w", width=1300)  # Aumentar bastante a largura da coluna 'Descrição'
+                tree.column(col, anchor="w", width=2000)  # Aumentar ainda mais a largura da coluna 'Descrição'
             else:
-                tree.column(col, anchor="w", width=200)  # Largura das outras colunas
+                tree.column(col, anchor="w", width=250)  # Largura das outras colunas
 
         # Preencher a tabela com os dados
         for _, row in df.iterrows():
             tree.insert("", "end", values=(row["N ocorrência"], row["Abertura"], row["Vencimento"], row["Responsável Abertura"], row["Descrição"]))
 
-        # Exibir a janela
-        root.geometry("1800x800")  # Ajustar o tamanho da janela para melhor visualização
+        # Ajustar a quebra automática de linha (word wrap) na coluna "Descrição"
+        tree.tag_configure('wrap', wraplength=2000, justify='left')
+
+        # Exibir a janela com uma largura e altura maiores para a coluna "Descrição"
+        root.geometry("2200x1000")  # Ajustar o tamanho da janela para melhor visualização
         root.mainloop()
 
     except Exception as e:
