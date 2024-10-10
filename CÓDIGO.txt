@@ -1,5 +1,6 @@
 import win32com.client
 import os
+import pandas as pd
 
 def listar_mensagens():
     # Acessar o aplicativo do Outlook
@@ -41,9 +42,16 @@ def baixar_anexo_outlook(mensagens, pasta_destino):
             if message.Attachments.Count > 0:
                 for anexo in message.Attachments:
                     if anexo.FileName.endswith(".xls") or anexo.FileName.endswith(".xlsx"):
+                        # Verificar se o diretório de destino existe, se não, criar
+                        if not os.path.exists(pasta_destino):
+                            os.makedirs(pasta_destino)  # Cria o diretório se não existir
+
                         caminho_anexo = os.path.join(pasta_destino, anexo.FileName)
                         anexo.SaveAsFile(caminho_anexo)
                         print(f"Anexo {anexo.FileName} salvo em {caminho_anexo}")
+
+                        # Filtrar dados da planilha
+                        filtrar_planilha(caminho_anexo)
                     else:
                         print(f"Anexo {anexo.FileName} não é uma planilha.")
             else:
@@ -51,6 +59,23 @@ def baixar_anexo_outlook(mensagens, pasta_destino):
             return
 
     print("Nenhum e-mail encontrado com o assunto especificado.")
+
+def filtrar_planilha(caminho_anexo):
+    # Ler a planilha usando pandas
+    try:
+        df = pd.read_excel(caminho_anexo)
+
+        # Filtrar apenas as linhas onde o cabeçalho 'Assunto' contém 'AGIR'
+        df_filtrado = df[df['Assunto'].str.contains('AGIR', na=False)]
+
+        # Definir o caminho para salvar a nova planilha
+        novo_caminho = os.path.splitext(caminho_anexo)[0] + '_filtrado.xlsx'
+        df_filtrado.to_excel(novo_caminho, index=False)
+
+        print(f"Planilha filtrada salva em: {novo_caminho}")
+
+    except Exception as e:
+        print(f"Ocorreu um erro ao filtrar a planilha: {str(e)}")
 
 # Definir o caminho onde a planilha será salva
 pasta_destino = r'C:\caminho\para\salvar\anexo'  # Altere para o caminho desejado
