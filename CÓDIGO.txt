@@ -4,6 +4,23 @@ import pandas as pd
 import tkinter as tk
 from tkinter import ttk
 
+# Função auxiliar para adicionar quebras de linha na descrição
+def adicionar_quebra_texto(texto, largura_maxima):
+    # Divide o texto em múltiplas linhas se exceder a largura máxima
+    palavras = texto.split()
+    linhas = []
+    linha_atual = []
+
+    for palavra in palavras:
+        if len(' '.join(linha_atual + [palavra])) <= largura_maxima:
+            linha_atual.append(palavra)
+        else:
+            linhas.append(' '.join(linha_atual))
+            linha_atual = [palavra]
+
+    linhas.append(' '.join(linha_atual))
+    return '\n'.join(linhas)
+
 def listar_mensagens():
     # Acessar o aplicativo do Outlook
     outlook = win32com.client.Dispatch("Outlook.Application")
@@ -116,6 +133,7 @@ def mostrar_informacoes(caminho_filtrado):
         tree.configure(xscroll=scrollbar_horizontal.set)
 
         # Definir as colunas
+        largura_maxima_descricao = 150  # Limite de caracteres por linha para a coluna Descrição
         for col in tree["columns"]:
             tree.heading(col, text=col)
             # Ajustar a largura das colunas conforme mencionado
@@ -124,9 +142,10 @@ def mostrar_informacoes(caminho_filtrado):
             else:
                 tree.column(col, anchor="w", width=200)  # Largura das outras colunas
 
-        # Preencher a tabela com os dados
+        # Preencher a tabela com os dados, aplicando quebra de linha na coluna 'Descrição'
         for _, row in df.iterrows():
-            tree.insert("", "end", values=(row["N ocorrência"], row["Abertura"], row["Vencimento"], row["Responsável Abertura"], row["Descrição"]))
+            descricao_com_quebra = adicionar_quebra_texto(str(row["Descrição"]), largura_maxima_descricao)
+            tree.insert("", "end", values=(row["N ocorrência"], row["Abertura"], row["Vencimento"], row["Responsável Abertura"], descricao_com_quebra))
 
         # Ajustar o tamanho da janela para o máximo possível
         root.geometry(f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}")  # Tamanho máximo da janela
