@@ -78,8 +78,8 @@ def on_item_click(event):
 def select_base_paths():
     folder_selected = filedialog.askdirectory()
     if folder_selected:
-        base_paths.append(folder_selected)
-        lbl_base_paths.config(text="Caminhos base adicionais:\n" + "\n".join(base_paths))
+        selected_base_paths.append(folder_selected)
+        lbl_base_paths.config(text="Caminhos base adicionais:\n" + "\n".join(selected_base_paths))
 
 # Função para adicionar um caminho selecionado a partir de um botão
 def add_predefined_path(path):
@@ -155,9 +155,9 @@ tree.heading('Nome do Arquivo', text='Nome do Arquivo')
 tree.heading('Data de Modificação', text='Data de Modificação')
 tree.heading('Caminho Completo', text='Caminho Completo')
 
-tree.column('Nome do Arquivo', anchor='w')
-tree.column('Data de Modificação', anchor='center')
-tree.column('Caminho Completo', anchor='w')
+tree.column('Nome do Arquivo', anchor='w', width=250)
+tree.column('Data de Modificação', anchor='center', width=150)
+tree.column('Caminho Completo', anchor='w', width=400)
 
 tree.pack(fill=tk.BOTH, expand=True)
 
