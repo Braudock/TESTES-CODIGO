@@ -50,7 +50,7 @@ def baixar_anexo_outlook(mensagens, pasta_destino):
                         anexo.SaveAsFile(caminho_anexo)
                         print(f"Anexo {anexo.FileName} salvo em {caminho_anexo}")
 
-                        # Filtrar dados da planilha
+                        # Filtrar dados da planilha e excluir a original
                         filtrar_planilha(caminho_anexo)
                     else:
                         print(f"Anexo {anexo.FileName} não é uma planilha.")
@@ -73,6 +73,10 @@ def filtrar_planilha(caminho_anexo):
         df_filtrado.to_excel(novo_caminho, index=False)
 
         print(f"Planilha filtrada salva em: {novo_caminho}")
+
+        # Excluir a planilha original
+        os.remove(caminho_anexo)
+        print(f"Planilha original excluída: {caminho_anexo}")
 
     except Exception as e:
         print(f"Ocorreu um erro ao filtrar a planilha: {str(e)}")
