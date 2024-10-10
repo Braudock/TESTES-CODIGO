@@ -105,26 +105,31 @@ def mostrar_informacoes(caminho_filtrado):
         tree = ttk.Treeview(frame, columns=["N ocorrência", "Abertura", "Vencimento", "Responsável Abertura", "Descrição"], show="headings")
         tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-        # Adicionar uma barra de rolagem
-        scrollbar = ttk.Scrollbar(frame, orient="vertical", command=tree.yview)
-        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-        tree.configure(yscroll=scrollbar.set)
+        # Adicionar uma barra de rolagem vertical
+        scrollbar_vertical = ttk.Scrollbar(frame, orient="vertical", command=tree.yview)
+        scrollbar_vertical.pack(side=tk.RIGHT, fill=tk.Y)
+        tree.configure(yscroll=scrollbar_vertical.set)
+
+        # Adicionar uma barra de rolagem horizontal para a coluna "Descrição"
+        scrollbar_horizontal = ttk.Scrollbar(root, orient="horizontal", command=tree.xview)
+        scrollbar_horizontal.pack(side=tk.BOTTOM, fill=tk.X)
+        tree.configure(xscroll=scrollbar_horizontal.set)
 
         # Definir as colunas
         for col in tree["columns"]:
             tree.heading(col, text=col)
-            # Aumentar a largura da coluna 'Descrição'
+            # Ajustar a largura das colunas conforme mencionado
             if col == "Descrição":
-                tree.column(col, anchor="w", width=400)  # Aumentar a largura da coluna 'Descrição'
+                tree.column(col, anchor="w", width=1000)  # Aumentar bastante a largura da coluna 'Descrição'
             else:
-                tree.column(col, anchor="w", width=200)  # Manter a largura das outras colunas
+                tree.column(col, anchor="w", width=200)  # Largura das outras colunas
 
         # Preencher a tabela com os dados
         for _, row in df.iterrows():
             tree.insert("", "end", values=(row["N ocorrência"], row["Abertura"], row["Vencimento"], row["Responsável Abertura"], row["Descrição"]))
 
         # Exibir a janela
-        root.geometry("1200x500")  # Ajustar tamanho da janela
+        root.geometry("1600x700")  # Ajustar o tamanho da janela para melhor visualização
         root.mainloop()
 
     except Exception as e:
