@@ -54,7 +54,8 @@ def baixar_anexo_outlook(mensagens, pasta_destino):
 
                         # Filtrar dados da planilha e excluir a original
                         caminho_filtrado = filtrar_planilha(caminho_anexo)
-                        mostrar_informacoes(caminho_filtrado)  # Mostrar informações após filtrar
+                        if caminho_filtrado:
+                            mostrar_informacoes(caminho_filtrado)  # Mostrar informações após filtrar
                     else:
                         print(f"Anexo {anexo.FileName} não é uma planilha.")
             else:
@@ -97,7 +98,7 @@ def mostrar_informacoes(caminho_filtrado):
         root.title("Informações Filtradas")
 
         # Cria um campo de texto rolável
-        text_area = scrolledtext.ScrolledText(root, width=80, height=20)
+        text_area = scrolledtext.ScrolledText(root, width=100, height=20)
         text_area.pack(padx=10, pady=10)
 
         # Cabeçalhos
@@ -108,6 +109,10 @@ def mostrar_informacoes(caminho_filtrado):
         for _, row in df.iterrows():
             linha = f"{row['N ocorrência']}\t{row['Abertura']}\t{row['Vencimento']}\t{row['Responsável Abertura']}\t{row['Descrição']}\n"
             text_area.insert(tk.END, linha)
+
+        # Ajustar largura das colunas
+        for i in range(len(cabeçalhos)):
+            text_area.tag_configure(f"col_{i}", justify='center')
 
         # Exibir a janela
         root.mainloop()
