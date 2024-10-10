@@ -118,9 +118,18 @@ def criar_janela_descricao(descricao):
     janela = tk.Toplevel()
     janela.title("Descrição Completa")
 
+    # Criar um frame para o Text Widget e a barra de rolagem
+    frame = tk.Frame(janela)
+    frame.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
+
     # Criar um widget Text para mostrar a descrição
-    text_widget = tk.Text(janela, wrap="word", width=100, height=30)  # Definindo largura e altura
-    text_widget.pack(padx=10, pady=10)
+    text_widget = tk.Text(frame, wrap="word", width=100, height=30)  # Definindo largura e altura
+    text_widget.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+    # Adicionar uma barra de rolagem vertical
+    scrollbar = ttk.Scrollbar(frame, orient="vertical", command=text_widget.yview)
+    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+    text_widget.configure(yscrollcommand=scrollbar.set)
 
     # Inserir a descrição no widget Text
     text_widget.insert(tk.END, descricao)
