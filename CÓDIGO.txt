@@ -1,4 +1,5 @@
 import os
+import csv
 import tkinter as tk
 from tkinter import messagebox, filedialog
 from tkinter import ttk
@@ -54,6 +55,13 @@ def populate_tree():
         for idx, (filename, path, mod_time, formatted_time) in enumerate(files):
             tree.insert('', 'end', iid=idx, values=(filename, formatted_time, path))
 
+        # Ajusta a largura das colunas
+        for col in tree["columns"]:
+            tree.column(col, width=tkFont.Font().measure(col), anchor='w')  # Configura largura inicial baseada nos cabeçalhos
+            for item in tree.get_children():
+                value = tree.item(item, 'values')[tree["columns"].index(col)]
+                tree.column(col, width=max(tree.column(col)["width"], tkFont.Font().measure(value)))
+
 # Função ao clicar no item da lista
 def on_item_click(event):
     selected_items = tree.selection()
@@ -69,6 +77,27 @@ def select_base_paths():
     if folder_selected:
         base_paths.append(folder_selected)
         label_base_paths.config(text="Caminhos base: " + ", ".join(base_paths))
+
+# Função para exportar dados da Treeview para um arquivo CSV
+def export_to_csv():
+    files = []
+    for item in tree.get_children():
+        files.append(tree.item(item, 'values'))
+    
+    if not files:
+        messagebox.showwarning("Exportação", "Nenhum dado para exportar.")
+        return
+    
+    save_path = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV files", "*.csv")])
+    if save_path:
+        try:
+            with open(save_path, mode='w', newline='', encoding='utf-8') as file:
+                writer = csv.writer(file)
+                writer.writerow(["Nome do Arquivo", "Data de Modificação", "Caminho Completo"])  # Cabeçalho
+                writer.writerows(files)  # Dados
+            messagebox.showinfo("Exportação", "Dados exportados com sucesso!")
+        except Exception as e:
+            messagebox.showerror("Erro", f"Erro ao exportar os dados: {e}")
 
 # Caminhos base
 base_paths = []
@@ -107,6 +136,10 @@ entry_specific_path.pack(side=tk.LEFT, padx=5)
 btn_load = ttk.Button(control_frame, text="Buscar Arquivos", command=populate_tree)
 btn_load.pack(side=tk.LEFT)
 
+# Botão para exportar dados
+btn_export = ttk.Button(control_frame, text="Exportar CSV", command=export_to_csv)
+btn_export.pack(side=tk.LEFT)
+
 # Frame para Treeview e Scrollbar
 tree_frame = ttk.Frame(root)
 tree_frame.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
@@ -125,9 +158,9 @@ tree = ttk.Treeview(tree_frame, columns=["Nome do Arquivo", "Data de Modificaç�
 tree.heading('Nome do Arquivo', text='Nome do Arquivo')
 tree.heading('Data de Modificação', text='Data de Modificação')
 tree.heading('Caminho Completo', text='Caminho Completo')
-tree.column('Nome do Arquivo', width=250, anchor='w')
-tree.column('Data de Modificação', width=150, anchor='center')
-tree.column('Caminho Completo', width=400, anchor='w')
+tree.column('Nome do Arquivo', anchor='w')
+tree.column('Data de Modificação', anchor='center')
+tree.column('Caminho Completo', anchor='w')
 tree.pack(fill=tk.BOTH, expand=True)
 
 # Configuração das scrollbars
