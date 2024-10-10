@@ -2,7 +2,7 @@ import win32com.client
 import os
 import pandas as pd
 import tkinter as tk
-from tkinter import scrolledtext
+from tkinter import ttk
 
 def listar_mensagens():
     # Acessar o aplicativo do Outlook
@@ -89,7 +89,7 @@ def filtrar_planilha(caminho_anexo):
         return None
 
 def mostrar_informacoes(caminho_filtrado):
-    # Ler a planilha filtrada e exibir as informações em uma caixa de diálogo
+    # Ler a planilha filtrada e exibir as informações em uma tabela
     try:
         df = pd.read_excel(caminho_filtrado)
 
@@ -97,21 +97,30 @@ def mostrar_informacoes(caminho_filtrado):
         root = tk.Tk()
         root.title("Informações Filtradas")
 
-        # Cria um campo de texto rolável
-        text_area = scrolledtext.ScrolledText(root, width=120, height=30)  # Aumentar a largura
-        text_area.pack(padx=10, pady=10)
+        # Cria um frame para a tabela
+        frame = tk.Frame(root)
+        frame.pack(padx=10, pady=10)
 
-        # Cabeçalhos
-        cabeçalhos = ["N ocorrência", "Abertura", "Vencimento", "Responsável Abertura", "Descrição"]
-        text_area.insert(tk.END, "\t".join(cabeçalhos) + "\n")
+        # Cria uma Treeview para mostrar os dados em formato de tabela
+        tree = ttk.Treeview(frame, columns=["N ocorrência", "Abertura", "Vencimento", "Responsável Abertura", "Descrição"], show="headings")
+        tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-        # Preencher as informações
+        # Adicionar uma barra de rolagem
+        scrollbar = ttk.Scrollbar(frame, orient="vertical", command=tree.yview)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        tree.configure(yscroll=scrollbar.set)
+
+        # Definir as colunas
+        for col in tree["columns"]:
+            tree.heading(col, text=col)
+            tree.column(col, anchor="w", width=200)  # Ajustar a largura das colunas
+
+        # Preencher a tabela com os dados
         for _, row in df.iterrows():
-            linha = f"{row['N ocorrência']}\t{row['Abertura']}\t{row['Vencimento']}\t{row['Responsável Abertura']}\t{row['Descrição']}\n"
-            text_area.insert(tk.END, linha)
+            tree.insert("", "end", values=(row["N ocorrência"], row["Abertura"], row["Vencimento"], row["Responsável Abertura"], row["Descrição"]))
 
         # Exibir a janela
-        root.geometry("900x400")  # Ajustar tamanho da janela
+        root.geometry("1000x400")  # Ajustar tamanho da janela
         root.mainloop()
 
     except Exception as e:
