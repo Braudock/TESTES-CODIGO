@@ -1,19 +1,32 @@
 import win32com.client
 import os
 
-def baixar_anexo_outlook(pasta_destino):
+def listar_pastas():
     try:
         # Acessar o aplicativo do Outlook
         outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
-        
-        # Tente acessar a caixa de entrada (pode ser necessário ajustar para "Inbox")
-        inbox = outlook.Folders.Item("Caixa de Entrada")  # Ou use "Inbox" se for em inglês
 
-        # Filtrar e-mails da caixa de entrada
+        # Listar todas as pastas principais
+        for folder in outlook.Folders:
+            print(f"Pasta: {folder.Name}")
+
+            # Listar subpastas da pasta principal
+            for subfolder in folder.Folders:
+                print(f"  Subpasta: {subfolder.Name}")
+
+    except Exception as e:
+        print(f"Ocorreu um erro ao listar as pastas: {str(e)}")
+
+def baixar_anexo_outlook(pasta_destino):
+    try:
+        outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
+
+        # Acessar a pasta "Caixa de Entrada" ou "Inbox"
+        inbox = outlook.Folders.Item("Caixa de Entrada")  # Tente mudar para "Inbox" se não funcionar
+
         mensagens = inbox.Items
         filtro_assunto = "indicadores central de atendimento"
         
-        # Filtrar por e-mails com o assunto 'indicadores central de atendimento'
         mensagens = mensagens.Restrict(f"[Subject] = '{filtro_assunto}'")
         mensagens.Sort("[ReceivedTime]", True)
 
@@ -37,6 +50,9 @@ def baixar_anexo_outlook(pasta_destino):
 
     except Exception as e:
         print(f"Ocorreu um erro: {str(e)}")
+
+# Chame a função para listar as pastas antes de tentar baixar o anexo
+listar_pastas()
 
 # Definir o caminho onde a planilha será salva
 pasta_destino = r'C:\caminho\para\salvar\anexo'
