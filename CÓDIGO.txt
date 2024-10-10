@@ -6,10 +6,13 @@ import subprocess
 from datetime import datetime
 
 # Função para buscar arquivos com o(s) código(s) no nome e ordenar pela data de modificação
-def search_files(base_paths, search_codes):
+def search_files(base_paths, search_codes, specific_path):
     found_files = []
     for base_path in base_paths:
         for root, dirs, files in os.walk(base_path):
+            # Verifica se o caminho específico é parte do caminho do arquivo
+            if specific_path and specific_path not in root:
+                continue  # Se o caminho específico não estiver no diretório atual, ignora
             for file in files:
                 for search_code in search_codes:
                     if search_code in file and file.endswith('.txt'):
@@ -35,6 +38,7 @@ def open_file(filepath):
 # Função para preencher a Treeview com os arquivos encontrados
 def populate_tree():
     search_codes = entry_code.get().strip().split(",")
+    specific_path = entry_specific_path.get().strip()  # Pega o caminho específico para filtrar
     if not search_codes or search_codes == ['']:
         messagebox.showwarning("Entrada Vazia", "Por favor, insira um ou mais códigos para buscar.")
         return
@@ -43,7 +47,7 @@ def populate_tree():
     for item in tree.get_children():
         tree.delete(item)
     
-    files = search_files(base_paths, search_codes)
+    files = search_files(base_paths, search_codes, specific_path)
     if not files:
         messagebox.showinfo("Nenhum Arquivo Encontrado", "Nenhum arquivo encontrado com os códigos especificados.")
     else:
@@ -92,6 +96,12 @@ label_code.pack(side=tk.LEFT, padx=5)
 entry_code = ttk.Entry(control_frame, width=40)
 entry_code.pack(side=tk.LEFT, padx=5)
 entry_code.bind('<Return>', lambda event: populate_tree())  # Permite buscar pressionando Enter
+
+# Label e entrada para o caminho específico
+label_specific_path = tk.Label(control_frame, text="Caminho Específico:")
+label_specific_path.pack(side=tk.LEFT, padx=5)
+entry_specific_path = ttk.Entry(control_frame, width=40)
+entry_specific_path.pack(side=tk.LEFT, padx=5)
 
 # Botão para carregar arquivos
 btn_load = ttk.Button(control_frame, text="Buscar Arquivos", command=populate_tree)
