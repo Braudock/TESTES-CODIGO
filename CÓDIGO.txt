@@ -45,7 +45,7 @@ def baixar_anexo_outlook(mensagens, pasta_destino):
                         anexo.SaveAsFile(caminho_anexo)
                         print(f"Anexo {anexo.FileName} salvo em {caminho_anexo}")
 
-                        # Filtrar dados da planilha e excluir a original
+                        # Filtrar e mostrar colunas necessárias
                         caminho_filtrado = filtrar_planilha(caminho_anexo)
                         if caminho_filtrado:
                             mostrar_informacoes(caminho_filtrado)  # Mostrar informações após filtrar
@@ -62,8 +62,9 @@ def filtrar_planilha(caminho_anexo):
     try:
         df = pd.read_excel(caminho_anexo)
 
-        # Filtrar apenas as linhas onde o cabeçalho 'Assunto' contém 'AGIR'
-        df_filtrado = df[df['Assunto'].str.contains('AGIR', na=False)]
+        # Manter apenas as colunas que você mencionou
+        colunas_necessarias = ['N ocorrência', 'Abertura', 'Vencimento', 'Responsável Abertura', 'Descrição']
+        df_filtrado = df[colunas_necessarias]
 
         # Definir o caminho para salvar a nova planilha
         novo_caminho = os.path.splitext(caminho_anexo)[0] + '_filtrado.xlsx'
