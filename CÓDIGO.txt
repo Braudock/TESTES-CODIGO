@@ -1,61 +1,62 @@
 import win32com.client
 import os
 
-def listar_pastas():
-    try:
-        # Acessar o aplicativo do Outlook
-        outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
+def listar_mensagens():
+    # Acessar o aplicativo do Outlook
+    outlook = win32com.client.Dispatch("Outlook.Application")
+    namespace = outlook.GetNamespace("MAPI")
+    
+    # Acessar a pasta "Caixa de Entrada" (6 corresponde à Inbox)
+    inbox = namespace.GetDefaultFolder(6)
+    messages = inbox.Items
 
-        # Listar todas as pastas principais
-        for folder in outlook.Folders:
-            print(f"Pasta: {folder.Name}")
+    # Ordenar as mensagens por data de recebimento (mais recentes primeiro)
+    messages.Sort("[ReceivedTime]", True)
 
-            # Listar subpastas da pasta principal
-            for subfolder in folder.Folders:
-                print(f"  Subpasta: {subfolder.Name}")
+    # Exibir informações sobre as mensagens
+    for message in messages:
+        print("Assunto:", message.Subject)
+        print("Data de Recebimento:", message.ReceivedTime)
+        print("Remetente:", message.SenderName)
+        print("Corpo:", message.Body)
+        print("-" * 40)  # Linha separadora
 
-    except Exception as e:
-        print(f"Ocorreu um erro ao listar as pastas: {str(e)}")
+    return messages
 
-def baixar_anexo_outlook(pasta_destino):
-    try:
-        outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
+def baixar_anexo_outlook(mensagens, pasta_destino):
+    # Filtrar e-mails com o assunto específico
+    filtro_assunto = "indicadores central de atendimento"
+    
+    # Verificar se há mensagens
+    if mensagens.Count == 0:
+        print("Nenhum e-mail encontrado na caixa de entrada.")
+        return
 
-        # Acessar a pasta "Caixa de Entrada" ou "Inbox"
-        inbox = outlook.Folders.Item("Caixa de Entrada")  # Tente mudar para "Inbox" se não funcionar
+    # Encontrar o último e-mail com o assunto especificado
+    for message in mensagens:
+        if filtro_assunto.lower() in message.Subject.lower():
+            print(f"Último e-mail encontrado:\nAssunto: {message.Subject}\nRecebido em: {message.ReceivedTime}")
 
-        mensagens = inbox.Items
-        filtro_assunto = "indicadores central de atendimento"
-        
-        mensagens = mensagens.Restrict(f"[Subject] = '{filtro_assunto}'")
-        mensagens.Sort("[ReceivedTime]", True)
-
-        if mensagens.Count == 0:
-            print("Nenhum e-mail encontrado com o assunto especificado.")
+            # Verificar se o e-mail contém anexos
+            if message.Attachments.Count > 0:
+                for anexo in message.Attachments:
+                    if anexo.FileName.endswith(".xls") or anexo.FileName.endswith(".xlsx"):
+                        caminho_anexo = os.path.join(pasta_destino, anexo.FileName)
+                        anexo.SaveAsFile(caminho_anexo)
+                        print(f"Anexo {anexo.FileName} salvo em {caminho_anexo}")
+                    else:
+                        print(f"Anexo {anexo.FileName} não é uma planilha.")
+            else:
+                print("Este e-mail não contém anexos.")
             return
 
-        email = mensagens.Item(1)
-        print(f"Último e-mail encontrado:\nAssunto: {email.Subject}\nRecebido em: {email.ReceivedTime}")
-
-        if email.Attachments.Count > 0:
-            for anexo in email.Attachments:
-                if anexo.FileName.endswith(".xls") or anexo.FileName.endswith(".xlsx"):
-                    caminho_anexo = os.path.join(pasta_destino, anexo.FileName)
-                    anexo.SaveAsFile(caminho_anexo)
-                    print(f"Anexo {anexo.FileName} salvo em {caminho_anexo}")
-                else:
-                    print(f"Anexo {anexo.FileName} não é uma planilha.")
-        else:
-            print("Este e-mail não contém anexos.")
-
-    except Exception as e:
-        print(f"Ocorreu um erro: {str(e)}")
-
-# Chame a função para listar as pastas antes de tentar baixar o anexo
-listar_pastas()
+    print("Nenhum e-mail encontrado com o assunto especificado.")
 
 # Definir o caminho onde a planilha será salva
-pasta_destino = r'C:\caminho\para\salvar\anexo'
+pasta_destino = r'C:\caminho\para\salvar\anexo'  # Altere para o caminho desejado
+
+# Listar mensagens na caixa de entrada
+mensagens = listar_mensagens()
 
 # Baixar o anexo do e-mail
-baixar_anexo_outlook(pasta_destino)
+baixar_anexo_outlook(mensagens, pasta_destino)
