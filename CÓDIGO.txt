@@ -16,14 +16,6 @@ def listar_mensagens():
     # Ordenar as mensagens por data de recebimento (mais recentes primeiro)
     messages.Sort("[ReceivedTime]", True)
 
-    # Exibir informações sobre as mensagens
-    for message in messages:
-        print("Assunto:", message.Subject)
-        print("Data de Recebimento:", message.ReceivedTime)
-        print("Remetente:", message.SenderName)
-        print("Corpo:", message.Body)
-        print("-" * 40)  # Linha separadora
-
     return messages
 
 def baixar_anexo_outlook(mensagens, pasta_destino):
@@ -43,7 +35,8 @@ def baixar_anexo_outlook(mensagens, pasta_destino):
             # Verificar se o e-mail contém anexos
             if message.Attachments.Count > 0:
                 for anexo in message.Attachments:
-                    if anexo.FileName.endswith(".xls") or anexo.FileName.endswith(".xlsx"):
+                    # Verifica se o anexo é uma planilha Excel (.xls ou .xlsx)
+                    if anexo.FileName.endswith((".xls", ".xlsx")):
                         # Verificar se o diretório de destino existe, se não, criar
                         if not os.path.exists(pasta_destino):
                             os.makedirs(pasta_destino)  # Cria o diretório se não existir
