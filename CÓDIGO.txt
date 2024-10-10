@@ -4,7 +4,6 @@ import pandas as pd
 import tkinter as tk
 from tkinter import ttk
 
-# Função auxiliar para adicionar quebras de linha na descrição
 def adicionar_quebra_texto(texto, largura_maxima):
     # Divide o texto em múltiplas linhas se exceder a largura máxima
     palavras = texto.split()
@@ -25,54 +24,30 @@ def listar_mensagens():
     # Acessar o aplicativo do Outlook
     outlook = win32com.client.Dispatch("Outlook.Application")
     namespace = outlook.GetNamespace("MAPI")
-    
-    # Acessar a pasta "Caixa de Entrada" (6 corresponde à Inbox)
     inbox = namespace.GetDefaultFolder(6)
     messages = inbox.Items
-
-    # Ordenar as mensagens por data de recebimento (mais recentes primeiro)
     messages.Sort("[ReceivedTime]", True)
-
-    # Exibir informações sobre as mensagens
-    for message in messages:
-        print("Assunto:", message.Subject)
-        print("Data de Recebimento:", message.ReceivedTime)
-        print("Remetente:", message.SenderName)
-        print("Corpo:", message.Body)
-        print("-" * 40)  # Linha separadora
-
     return messages
 
 def baixar_anexo_outlook(mensagens, pasta_destino):
-    # Filtrar e-mails com o assunto específico
     filtro_assunto = "indicadores central de atendimento"
     
-    # Verificar se há mensagens
     if mensagens.Count == 0:
         print("Nenhum e-mail encontrado na caixa de entrada.")
         return
 
-    # Encontrar o último e-mail com o assunto especificado
     for message in mensagens:
         if filtro_assunto.lower() in message.Subject.lower():
-            print(f"Último e-mail encontrado:\nAssunto: {message.Subject}\nRecebido em: {message.ReceivedTime}")
-
-            # Verificar se o e-mail contém anexos
             if message.Attachments.Count > 0:
                 for anexo in message.Attachments:
                     if anexo.FileName.endswith(".xls") or anexo.FileName.endswith(".xlsx"):
-                        # Verificar se o diretório de destino existe, se não, criar
                         if not os.path.exists(pasta_destino):
-                            os.makedirs(pasta_destino)  # Cria o diretório se não existir
-
+                            os.makedirs(pasta_destino)
                         caminho_anexo = os.path.join(pasta_destino, anexo.FileName)
                         anexo.SaveAsFile(caminho_anexo)
-                        print(f"Anexo {anexo.FileName} salvo em {caminho_anexo}")
-
-                        # Filtrar dados da planilha e excluir a original
                         caminho_filtrado = filtrar_planilha(caminho_anexo)
                         if caminho_filtrado:
-                            mostrar_informacoes(caminho_filtrado)  # Mostrar informações após filtrar
+                            mostrar_informacoes(caminho_filtrado)
                     else:
                         print(f"Anexo {anexo.FileName} não é uma planilha.")
             else:
@@ -82,78 +57,75 @@ def baixar_anexo_outlook(mensagens, pasta_destino):
     print("Nenhum e-mail encontrado com o assunto especificado.")
 
 def filtrar_planilha(caminho_anexo):
-    # Ler a planilha usando pandas
     try:
         df = pd.read_excel(caminho_anexo)
-
-        # Filtrar apenas as linhas onde o cabeçalho 'Assunto' contém 'AGIR'
         df_filtrado = df[df['Assunto'].str.contains('AGIR', na=False)]
-
-        # Definir o caminho para salvar a nova planilha
         novo_caminho = os.path.splitext(caminho_anexo)[0] + '_filtrado.xlsx'
         df_filtrado.to_excel(novo_caminho, index=False)
-
-        print(f"Planilha filtrada salva em: {novo_caminho}")
-
-        # Excluir a planilha original
         os.remove(caminho_anexo)
-        print(f"Planilha original excluída: {caminho_anexo}")
-
-        return novo_caminho  # Retorna o caminho da planilha filtrada
-
+        return novo_caminho
     except Exception as e:
         print(f"Ocorreu um erro ao filtrar a planilha: {str(e)}")
         return None
 
 def mostrar_informacoes(caminho_filtrado):
-    # Ler a planilha filtrada e exibir as informações em uma tabela
     try:
         df = pd.read_excel(caminho_filtrado)
 
-        # Cria a janela principal
         root = tk.Tk()
         root.title("Informações Filtradas")
 
-        # Cria um frame para a tabela
         frame = tk.Frame(root)
         frame.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
 
-        # Cria uma Treeview para mostrar os dados em formato de tabela
         tree = ttk.Treeview(frame, columns=["N ocorrência", "Abertura", "Vencimento", "Responsável Abertura", "Descrição"], show="headings")
         tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-        # Adicionar uma barra de rolagem vertical
         scrollbar_vertical = ttk.Scrollbar(frame, orient="vertical", command=tree.yview)
         scrollbar_vertical.pack(side=tk.RIGHT, fill=tk.Y)
         tree.configure(yscroll=scrollbar_vertical.set)
 
-        # Adicionar uma barra de rolagem horizontal para a coluna "Descrição"
-        scrollbar_horizontal = ttk.Scrollbar(root, orient="horizontal", command=tree.xview)
-        scrollbar_horizontal.pack(side=tk.BOTTOM, fill=tk.X)
-        tree.configure(xscroll=scrollbar_horizontal.set)
-
-        # Definir as colunas
-        largura_maxima_descricao = 91  # Limite de caracteres por linha para a coluna Descrição
         for col in tree["columns"]:
             tree.heading(col, text=col)
-            # Ajustar a largura das colunas conforme mencionado
-            if col == "Descrição":
-                tree.column(col, anchor="w", width=2000)  # Largura fixa para a coluna 'Descrição'
-            else:
-                tree.column(col, anchor="w", width=200)  # Largura das outras colunas
+            tree.column(col, anchor="w", width=200 if col != "Descrição" else 91)
 
-        # Preencher a tabela com os dados, aplicando quebra de linha na coluna 'Descrição'
+        # Preencher a tabela com os dados
         for _, row in df.iterrows():
-            descricao_com_quebra = adicionar_quebra_texto(str(row["Descrição"]), largura_maxima_descricao)
+            descricao_com_quebra = adicionar_quebra_texto(str(row["Descrição"]), 91)
             tree.insert("", "end", values=(row["N ocorrência"], row["Abertura"], row["Vencimento"], row["Responsável Abertura"], descricao_com_quebra))
 
-        # Ajustar o tamanho da janela para o máximo possível
-        root.geometry(f"{root.winfo_screenwidth()}x{root.winfo_screenheight()}")  # Tamanho máximo da janela
-        root.state('zoomed')  # Maximiza a janela para ocupar toda a tela
+        # Definir o evento de clique para abrir a descrição detalhada
+        tree.bind("<Double-1>", lambda event: mostrar_descricao_detalhada(tree, df))
+
+        root.geometry("800x600")
         root.mainloop()
 
     except Exception as e:
         print(f"Ocorreu um erro ao mostrar as informações: {str(e)}")
+
+def mostrar_descricao_detalhada(tree, df):
+    # Obter a seleção atual
+    selecionado = tree.selection()
+    if selecionado:
+        item = selecionado[0]
+        valores = tree.item(item, "values")
+        index = tree.index(item)
+
+        descricao = df.iloc[index]["Descrição"]  # Obter a descrição completa
+        criar_janela_descricao(descricao)
+
+def criar_janela_descricao(descricao):
+    janela = tk.Toplevel()
+    janela.title("Descrição Completa")
+
+    # Criar um widget Text para mostrar a descrição
+    text_widget = tk.Text(janela, wrap="word", width=100, height=30)  # Definindo largura e altura
+    text_widget.pack(padx=10, pady=10)
+
+    # Inserir a descrição no widget Text
+    text_widget.insert(tk.END, descricao)
+    text_widget.config(state=tk.DISABLED)  # Desabilitar edição
+    janela.geometry("800x600")  # Tamanho da janela
 
 # Definir o caminho onde a planilha será salva
 pasta_destino = r'C:\caminho\para\salvar\anexo'  # Altere para o caminho desejado
