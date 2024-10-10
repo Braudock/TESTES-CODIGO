@@ -133,12 +133,12 @@ def mostrar_informacoes(caminho_filtrado):
         tree.configure(xscroll=scrollbar_horizontal.set)
 
         # Definir as colunas
-        largura_maxima_descricao = 150  # Limite de caracteres por linha para a coluna Descrição
+        largura_maxima_descricao = 91  # Limite de caracteres por linha para a coluna Descrição
         for col in tree["columns"]:
             tree.heading(col, text=col)
             # Ajustar a largura das colunas conforme mencionado
             if col == "Descrição":
-                tree.column(col, anchor="w", width=2000)  # Aumentar bastante a largura da coluna 'Descrição'
+                tree.column(col, anchor="w", width=2000)  # Largura fixa para a coluna 'Descrição'
             else:
                 tree.column(col, anchor="w", width=200)  # Largura das outras colunas
 
