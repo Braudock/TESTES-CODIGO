@@ -113,14 +113,18 @@ def mostrar_informacoes(caminho_filtrado):
         # Definir as colunas
         for col in tree["columns"]:
             tree.heading(col, text=col)
-            tree.column(col, anchor="w", width=200)  # Ajustar a largura das colunas
+            # Aumentar a largura da coluna 'Descrição'
+            if col == "Descrição":
+                tree.column(col, anchor="w", width=400)  # Aumentar a largura da coluna 'Descrição'
+            else:
+                tree.column(col, anchor="w", width=200)  # Manter a largura das outras colunas
 
         # Preencher a tabela com os dados
         for _, row in df.iterrows():
             tree.insert("", "end", values=(row["N ocorrência"], row["Abertura"], row["Vencimento"], row["Responsável Abertura"], row["Descrição"]))
 
         # Exibir a janela
-        root.geometry("1000x400")  # Ajustar tamanho da janela
+        root.geometry("1200x500")  # Ajustar tamanho da janela
         root.mainloop()
 
     except Exception as e:
