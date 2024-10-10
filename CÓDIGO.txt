@@ -5,6 +5,7 @@ from tkinter import messagebox, filedialog
 from tkinter import ttk
 import subprocess
 from datetime import datetime
+import tkinter.font as tkFont  # Importando tkinter.font
 
 # Função para buscar arquivos com o(s) código(s) no nome e ordenar pela data de modificação
 def search_files(base_paths, search_codes, specific_path):
@@ -57,7 +58,8 @@ def populate_tree():
 
         # Ajusta a largura das colunas
         for col in tree["columns"]:
-            tree.column(col, width=tkFont.Font().measure(col), anchor='w')  # Configura largura inicial baseada nos cabeçalhos
+            # Configura largura inicial baseada nos cabeçalhos
+            tree.column(col, width=tkFont.Font().measure(col), anchor='w')
             for item in tree.get_children():
                 value = tree.item(item, 'values')[tree["columns"].index(col)]
                 tree.column(col, width=max(tree.column(col)["width"], tkFont.Font().measure(value)))
