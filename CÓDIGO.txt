@@ -1,6 +1,1 @@
-=SEERRO(EXTRATEXTO(B2, LOCALIZAR("\202", B2)+1, 13), "Não encontrado")
-
-=SEERRO(EXTRATEXTO(B2, LOCALIZAR("_20", B2)+1, 13), "Não encontrado")
-
-
-=SEERRO(EXTRATEXTO(B2, LOCALIZAR("202", B2), 13), "Não encontrado")
+=SEERRO(EXTRATEXTO(B2; 72; 12); "Não encontrado")
