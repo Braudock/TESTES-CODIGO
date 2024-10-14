@@ -1,0 +1,74 @@
+import os
+import tkinter as tk
+from tkinter import filedialog, messagebox
+import re
+
+# Tabela de códigos e produtos
+codigo_produto = {
+    1461: "CONSORCIO",
+    1460: "CONSORCIO",
+    1471: "PERFORMANCE GERENTES PARES",
+    1470: "PERFORMANCE GERENTES PARES",
+    1445: "TICKET",
+    1444: "TICKET",
+    1442: "PIX",
+    1443: "PIX",
+    1439: "CONVENIENCIA DE PAGAMENTOS",
+    1438: "CONVENIENCIA DE PAGAMENTOS",
+    1707: "PIX",
+    1702: "DEB AUT / DEB AUT AUTORIZADO",
+    1481: "PRESTAMISTA AVULSO",
+    1480: "PRESTAMISTA AVULSO",
+    2019: "CAMBIO",
+    1462: "CARTÃO BUSINESS",
+    1463: "CARTÃO BUSINESS",
+    1436: "FATURAMENTO DAC",
+    1437: "FATURAMENTO DAC"
+}
+
+# Função para abrir uma caixa de diálogo e selecionar uma pasta
+def selecionar_pasta():
+    root = tk.Tk()
+    root.withdraw()
+    pasta = filedialog.askdirectory(title="Selecione a pasta onde estão os arquivos TXT")
+    return pasta
+
+# Função para verificar os arquivos na pasta selecionada
+def verificar_arquivos(pasta):
+    arquivos_txt = [f for f in os.listdir(pasta) if f.endswith('.txt')]
+    codigos_encontrados = {codigo: [] for codigo in codigo_produto}
+
+    for arquivo in arquivos_txt:
+        with open(os.path.join(pasta, arquivo), 'r', encoding='utf-8') as f:
+            conteudo = f.read()
+            for codigo in codigo_produto:
+                if re.search(rf"\b{codigo}\b", conteudo):
+                    codigos_encontrados[codigo].append(arquivo)
+
+    return codigos_encontrados
+
+# Função para exibir os resultados em uma caixa de diálogo
+def exibir_resultados(codigos_encontrados):
+    resultados = ""
+    for codigo, arquivos in codigos_encontrados.items():
+        produto = codigo_produto[codigo]
+        if arquivos:
+            resultados += f"Código {codigo} ({produto}) encontrado nos arquivos: {', '.join(arquivos)}\n"
+        else:
+            resultados += f"Código {codigo} ({produto}) não encontrado em nenhum arquivo.\n"
+    
+    messagebox.showinfo("Resultados da Verificação", resultados)
+
+# Função principal
+def main():
+    pasta = selecionar_pasta()
+    if not pasta:
+        messagebox.showerror("Erro", "Nenhuma pasta selecionada!")
+        return
+
+    codigos_encontrados = verificar_arquivos(pasta)
+    exibir_resultados(codigos_encontrados)
+
+# Execução do programa
+if __name__ == "__main__":
+    main()
