@@ -1,0 +1,7 @@
+import webbrowser
+
+# URL do site que você deseja abrir
+url = 'https://www.exemplo.com'
+
+# Abre o site no navegador padrão
+webbrowser.open(url)
