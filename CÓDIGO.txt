@@ -1,7 +1,3 @@
-=EXT.TEXTO(SUBSTITUIR(A1; "."; ""); LOCALIZAR("CNPJ completo:"; A1)+15; 14)
+Prezado(a), boa tarde.
 
-=EXT.TEXTO(SUBSTITUIR(SUBSTITUIR(SUBSTITUIR(A1; "."; ""); "/"; ""); "-"; ""); LOCALIZAR("CNPJ completo:"; A1)+15; 14)
-
-
-
-=EXT.TEXTO(SUBSTITUIR(SUBSTITUIR(SUBSTITUIR(SUBSTITUIR(A1; "."; ""); "/"; ""); "-"; ""); " "; ""); LOCALIZAR("CNPJ completo:"; A1)+15; 14)
+Após análise, constatamos que o CNPJ informado teve a data de débito no mês de outubro de 2024. Por esse motivo, contabilizaremos a operação para o referido mês, conforme orientações da cartilha.
