@@ -1,5 +1,0 @@
-Bom dia,
-
-Para o nosso processo de captura de produção de ticket por CNPJ dentro de cada trimestre, consideramos sempre a produção mais recente registrada no período, sendo apenas uma produção por CNPJ.
-
-Solicitamos que o formato da base de dados seja organizado para que as datas de produção estejam sempre da mais nova para a mais antiga. Isso garantirá a captura correta das produções de ticket por CNPJ dentro de cada trimestre.
