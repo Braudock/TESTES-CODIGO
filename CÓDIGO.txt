@@ -1,3 +1,4 @@
+import requests
 from bs4 import BeautifulSoup
 
 # URL da página onde a imagem está
@@ -14,10 +15,13 @@ if img_tag and 'src' in img_tag.attrs:
     if not url_imagem.startswith("http"):
         url_imagem = f"https://exemplo.com{url_imagem}"
     
+    # Nome do arquivo para salvar a imagem
+    nome_arquivo = "imagem_baixada.jpg"
+    
     # Baixa a imagem
     response = requests.get(url_imagem)
     with open(nome_arquivo, "wb") as file:
         file.write(response.content)
-    print("Imagem baixada.")
+    print("Imagem baixada e salva como", nome_arquivo)
 else:
     print("Imagem não encontrada.")
