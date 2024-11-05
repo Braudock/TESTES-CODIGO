@@ -1,5 +1,8 @@
-proxies = {
-    "http": "http://seu_proxy:porta",
-    "https": "http://seu_proxy:porta",
-}
-response = requests.get(img_url, proxies=proxies)
+from requests_ntlm import HttpNtlmAuth
+import requests
+
+url = "http://site-corporativo.com/imagem"
+username = "DOMINIO\\seu_usuario"
+password = "sua_senha"
+
+response = requests.get(url, auth=HttpNtlmAuth(username, password))
