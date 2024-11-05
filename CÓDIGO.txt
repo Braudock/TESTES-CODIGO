@@ -1,52 +1,12 @@
-import pandas as pd
-import datetime
-import requests
-from bs4 import BeautifulSoup
-import os
+Aqui está uma versão aprimorada do texto:
 
-# Caminho para a planilha
-caminho_planilha = "caminho/para/sua_planilha.xlsx"
 
-# Leitura da planilha
-df = pd.read_excel(caminho_planilha)
+---
 
-# Verifica a data atual
-data_atual = datetime.datetime.now().strftime('%Y-%m-%d')
+Prezada Equipe,
 
-# Filtra aniversariantes do dia
-aniversariantes = df[df['Data de Aniversário'] == data_atual]
+Após análise, verificamos que os CNPJs mencionados já estão registrados em nossa base de dados.
 
-# Verifica se há aniversariantes
-if not aniversariantes.empty:
-    for index, colaborador in aniversariantes.iterrows():
-        # Construir a URL com a informação numérica do funcionário
-        # Exemplo: URL_BASE?campo_informacao=NUMERO
-        url = f"https://suaurl.com?campo_informacao={colaborador['Informação Numérica']}"
-        
-        # Fazer a requisição para a URL
-        response = requests.get(url)
-        
-        if response.status_code == 200:
-            # Analisa o conteúdo HTML da resposta
-            soup = BeautifulSoup(response.content, 'html.parser')
-            
-            # Extrai o URL da foto (ajuste o seletor conforme necessário)
-            foto_elemento = soup.find("img", {"id": "id_da_foto"})  # Exemplo de seletor
-            if foto_elemento and 'src' in foto_elemento.attrs:
-                foto_url = foto_elemento['src']
-                
-                # Baixa a foto do colaborador
-                foto_data = requests.get(foto_url).content
-                nome_arquivo = f"foto_{colaborador['Nome']}.jpg"
-                
-                # Salva a foto em uma pasta local
-                with open(nome_arquivo, 'wb') as foto_file:
-                    foto_file.write(foto_data)
-                
-                print(f"Foto de {colaborador['Nome']} salva como {nome_arquivo}.")
-            else:
-                print(f"Não foi possível localizar a foto de {colaborador['Nome']}.")
-        else:
-            print(f"Erro ao acessar a URL para {colaborador['Nome']}. Status: {response.status_code}")
-else:
-    print("Nenhum colaborador aniversariando hoje.")
+Atenciosamente,
+Equipe Gera
+
