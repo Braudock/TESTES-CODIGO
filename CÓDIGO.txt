@@ -1,0 +1,81 @@
+Sub BaixarFotosAniversariantes()
+    Dim ws As Worksheet
+    Dim hoje As String
+    Dim linha As Long
+    Dim numFunc As String
+    Dim aniversario As String
+    Dim urlBase As String
+    Dim fotoUrl As String
+    Dim nomeArquivo As String
+    Dim xmlhttp As Object
+    Dim htmlDoc As Object
+    Dim imgNode As Object
+    
+    ' Define a data de hoje no formato "d/m"
+    hoje = Format(Date, "d/m")
+    Set ws = ThisWorkbook.Sheets("Aniversariantes, Marcelo") ' Ajuste o nome da aba conforme necessário
+    
+    ' URL base do site (substitua pela URL da página de busca)
+    urlBase = "https://taudigitalworkplace.lightning.force.com/lightning/n/Cad_Voc"
+    
+    ' Inicializa o XMLHTTP
+    Set xmlhttp = CreateObject("MSXML2.XMLHTTP.6.0")
+    Set htmlDoc = CreateObject("htmlfile")
+    
+    ' Itera pelas linhas da planilha
+    For linha = 2 To ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
+        aniversario = Format(ws.Cells(linha, "E").Value, "d/m")
+        
+        ' Verifica se é o aniversário hoje
+        If aniversario = hoje Then
+            numFunc = ws.Cells(linha, "A").Value
+            
+            ' Envia a requisição HTTP
+            xmlhttp.Open "GET", urlBase & "?search=" & numFunc, False
+            xmlhttp.setRequestHeader "Content-Type", "application/x-www-form-urlencoded"
+            xmlhttp.Send
+            
+            ' Carrega a resposta no documento HTML
+            htmlDoc.body.innerHTML = xmlhttp.responseText
+            
+            ' Encontra o elemento da imagem (ajuste o seletor conforme necessário)
+            Set imgNode = htmlDoc.querySelector("img.seletor-da-imagem") ' Ajuste o seletor
+            
+            If Not imgNode Is Nothing Then
+                fotoUrl = imgNode.src
+                
+                ' Baixar a imagem
+                nomeArquivo = ThisWorkbook.Path & "\" & numFunc & "_foto.jpg"
+                BaixarImagem fotoUrl, nomeArquivo
+                MsgBox "Imagem de " & numFunc & " baixada com sucesso."
+            Else
+                MsgBox "Imagem de " & numFunc & " não encontrada."
+            End If
+        End If
+    Next linha
+    
+    ' Libera objetos
+    Set xmlhttp = Nothing
+    Set htmlDoc = Nothing
+End Sub
+
+Sub BaixarImagem(ByVal imageUrl As String, ByVal savePath As String)
+    Dim xmlhttp As Object
+    Dim stream As Object
+    
+    Set xmlhttp = CreateObject("MSXML2.XMLHTTP.6.0")
+    xmlhttp.Open "GET", imageUrl, False
+    xmlhttp.Send
+    
+    If xmlhttp.Status = 200 Then
+        Set stream = CreateObject("ADODB.Stream")
+        stream.Type = 1 ' Tipo binário
+        stream.Open
+        stream.Write xmlhttp.responseBody
+        stream.SaveToFile savePath, 2 ' Salva o arquivo
+        stream.Close
+        Set stream = Nothing
+    End If
+    
+    Set xmlhttp = Nothing
+End Sub
