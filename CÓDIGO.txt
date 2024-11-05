@@ -1,11 +1,7 @@
-import asyncio
-from pyppeteer import launch
+import pyautogui
+import time
 
-async def acessar_pagina():
-    browser = await launch()
-    page = await browser.newPage()
-    await page.goto("http://url-do-site.com")
-    # Adicione aqui os passos para interagir com a página
-    await browser.close()
-
-asyncio.get_event_loop().run_until_complete(acessar_pagina())
+# Abre o navegador manualmente e navega até a página
+pyautogui.click(100, 200)  # Clique nas coordenadas específicas
+time.sleep(2)  # Espera a página carregar
+pyautogui.screenshot("screenshot.png")  # Captura a tela
