@@ -1,0 +1,54 @@
+import pandas as pd
+import requests
+from bs4 import BeautifulSoup
+from datetime import datetime
+
+# Função para baixar imagem
+def baixar_imagem(image_url, save_path):
+    response = requests.get(image_url)
+    if response.status_code == 200:
+        with open(save_path, 'wb') as f:
+            f.write(response.content)
+        print(f"Imagem salva em: {save_path}")
+    else:
+        print("Erro ao baixar a imagem:", response.status_code)
+
+# Carregar a planilha
+def baixar_fotos_aniversariantes():
+    # Lê o arquivo Excel
+    df = pd.read_excel("aniversariantes.xlsx", sheet_name="Aniversariantes, Marcelo")  # Ajuste o nome da aba conforme necessário
+    
+    # Obtém a data de hoje no formato "d/m"
+    hoje = datetime.now().strftime("%d/%m")
+
+    # URL base do site
+    url_base = "https://taudigitalworkplace.lightning.force.com/lightning/n/Cad_Voc"
+
+    # Itera pelas linhas do DataFrame
+    for index, row in df.iterrows():
+        aniversario = row["E"].strftime("%d/%m")  # Supondo que a coluna E é do tipo data
+        num_func = row["A"]  # Supondo que a coluna A contém o número do funcionário
+
+        # Verifica se é o aniversário hoje
+        if aniversario == hoje:
+            # Envia a requisição HTTP
+            response = requests.get(f"{url_base}?search={num_func}")
+            if response.status_code == 200:
+                # Carrega a resposta no BeautifulSoup
+                soup = BeautifulSoup(response.text, 'html.parser')
+
+                # Encontra o elemento da imagem
+                img_node = soup.select_one("#brandBand_2 div.windowViewMode-normal.oneContent.active.lafPageHost div.slds-lookup.cCadeVoceBuscaDesktop img")
+                
+                if img_node:
+                    foto_url = img_node['src']
+                    # Define o caminho para salvar a imagem
+                    nome_arquivo = f"{num_func}_foto.jpg"
+                    baixar_imagem(foto_url, nome_arquivo)
+                else:
+                    print(f"Imagem de {num_func} não encontrada.")
+            else:
+                print("Erro ao acessar a URL:", response.status_code)
+
+# Executar a função
+baixar_fotos_aniversariantes()
