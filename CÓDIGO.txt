@@ -38,8 +38,8 @@ Sub BaixarFotosAniversariantes()
             ' Carrega a resposta no documento HTML
             htmlDoc.body.innerHTML = xmlhttp.responseText
             
-            ' Encontra o elemento da imagem (ajuste o seletor conforme necessário)
-            Set imgNode = htmlDoc.querySelector("img.seletor-da-imagem") ' Ajuste o seletor
+            ' Encontra o elemento da imagem usando o seletor
+            Set imgNode = htmlDoc.querySelector("#brandBand_2 div.windowViewMode-normal.oneContent.active.lafPageHost div.slds-lookup.cCadeVoceBuscaDesktop img")
             
             If Not imgNode Is Nothing Then
                 fotoUrl = imgNode.src
