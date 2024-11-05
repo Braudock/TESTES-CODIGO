@@ -1,25 +1,23 @@
 from bs4 import BeautifulSoup
-import requests
 
 # URL da página onde a imagem está
 url_pagina = "https://exemplo.com/pagina"
 response = requests.get(url_pagina)
 soup = BeautifulSoup(response.text, "html.parser")
 
-# Encontre a tag da imagem e pegue o URL a partir de um atributo personalizado, como 'data-src'
-img_tag = soup.find("img", {"data-src": True})  # Procura uma imagem que tenha o atributo 'data-src'
-if img_tag:
-    url_imagem = img_tag['data-src']  # Extrai o valor do atributo 'data-src'
+# Encontre a tag de imagem (exemplo para o primeiro 'img')
+img_tag = soup.find("img")
+if img_tag and 'src' in img_tag.attrs:
+    url_imagem = img_tag['src']
     
     # Completar o URL se for relativo
     if not url_imagem.startswith("http"):
         url_imagem = f"https://exemplo.com{url_imagem}"
     
-    # Faz o download da imagem
+    # Baixa a imagem
     response = requests.get(url_imagem)
-    nome_arquivo = "imagem_baixada.jpg"
     with open(nome_arquivo, "wb") as file:
         file.write(response.content)
-    print(f"Imagem baixada e salva como {nome_arquivo}")
+    print("Imagem baixada.")
 else:
-    print("Imagem com o atributo 'data-src' não encontrada.")
+    print("Imagem não encontrada.")
