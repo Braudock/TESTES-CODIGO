@@ -1,7 +1,20 @@
-import http.client
+import requests
+from bs4 import BeautifulSoup
 
-conn = http.client.HTTPSConnection("example.com", 443)  # Substitua pelo domínio
-conn.request("GET", "/")
-response = conn.getresponse()
-data = response.read()
-print(data)
+# URL da página que você deseja acessar
+url = 'https://example.com'  # Substitua pelo URL desejado
+
+# Fazendo uma requisição GET
+response = requests.get(url)
+
+# Verificando se a requisição foi bem-sucedida
+if response.status_code == 200:
+    # Analisando o conteúdo HTML da página
+    soup = BeautifulSoup(response.content, 'html.parser')
+
+    # Exibindo todos os elementos da página
+    # Você pode alterar o método de acordo com suas necessidades
+    for element in soup.find_all(True):  # find_all(True) retorna todos os elementos
+        print(f'Tag: {element.name}, Atributos: {element.attrs}, Texto: {element.get_text(strip=True)}')
+else:
+    print('Erro ao acessar o site:', response.status_code)
