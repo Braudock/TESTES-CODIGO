@@ -1,56 +1,29 @@
 import requests
-from bs4 import BeautifulSoup
 from datetime import datetime
 import os
 
 # Configuração inicial
-url = "URL_DO_SITE"  # Coloque aqui a URL da página onde você insere o código
-codigo = "CODIGO_DO_USUARIO"  # Coloque aqui o código que deseja inserir
+codigo = "CODIGO_DO_USUARIO"  # Código do funcionário
+url_base_imagem = "http://site.com/imagens/"  # URL base onde as imagens estão armazenadas
 output_folder = "imagens_aniversariantes"
 
-# Função para enviar o código e obter a URL da imagem
-def obter_url_imagem(codigo):
-    # Fazer a requisição inicial para obter os cookies ou tokens necessários
-    session = requests.Session()
-    response = session.get(url)
-
-    # Analisar a página e encontrar o token CSRF ou outro campo oculto, se necessário
-    soup = BeautifulSoup(response.text, 'html.parser')
-    csrf_token = soup.find("input", {"name": "csrf_token"}).get("value")  # Ajuste o nome do token
-
-    # Enviar o código via POST (exemplo)
-    data = {
-        "codigo": codigo,
-        "csrf_token": csrf_token  # Inclua o token, se necessário
-    }
-    response = session.post(url, data=data)
-
-    # Parse da resposta para extrair a URL da imagem
-    soup = BeautifulSoup(response.text, 'html.parser')
-    img_tag = soup.find("img", {"id": "foto_colaborador"})  # Ajuste o seletor de acordo com a página
-
-    if img_tag:
-        img_url = img_tag['src']
-        if not img_url.startswith("http"):
-            img_url = url + img_url  # Completar a URL se estiver incompleta
-        return img_url
-    else:
-        return None
-
-# Função para baixar a imagem
-def salvar_imagem(img_url, codigo):
+# Função para baixar a imagem diretamente
+def salvar_imagem(codigo):
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
 
-    img_data = requests.get(img_url).content
-    filename = f"{output_folder}/{codigo}_{datetime.today().strftime('%Y-%m-%d')}.jpg"
-    with open(filename, 'wb') as handler:
-        handler.write(img_data)
-    print(f"Imagem salva como {filename}")
+    # Monta a URL da imagem
+    img_url = f"{url_base_imagem}{codigo}.jpg"
+
+    # Faz a requisição da imagem
+    response = requests.get(img_url, timeout=10)
+    if response.status_code == 200:
+        filename = f"{output_folder}/{codigo}_{datetime.today().strftime('%Y-%m-%d')}.jpg"
+        with open(filename, 'wb') as handler:
+            handler.write(response.content)
+        print(f"Imagem salva como {filename}")
+    else:
+        print("Imagem não encontrada ou código inválido.")
 
 # Executar o processo
-img_url = obter_url_imagem(codigo)
-if img_url:
-    salvar_imagem(img_url, codigo)
-else:
-    print("Imagem não encontrada ou código inválido.")
+salvar_imagem(codigo)
