@@ -1,7 +1,25 @@
-import pyautogui
-import time
+from bs4 import BeautifulSoup
+import requests
 
-# Abre o navegador manualmente e navega até a página
-pyautogui.click(100, 200)  # Clique nas coordenadas específicas
-time.sleep(2)  # Espera a página carregar
-pyautogui.screenshot("screenshot.png")  # Captura a tela
+# URL da página onde a imagem está
+url_pagina = "https://exemplo.com/pagina"
+response = requests.get(url_pagina)
+soup = BeautifulSoup(response.text, "html.parser")
+
+# Encontre a tag da imagem e pegue o URL a partir de um atributo personalizado, como 'data-src'
+img_tag = soup.find("img", {"data-src": True})  # Procura uma imagem que tenha o atributo 'data-src'
+if img_tag:
+    url_imagem = img_tag['data-src']  # Extrai o valor do atributo 'data-src'
+    
+    # Completar o URL se for relativo
+    if not url_imagem.startswith("http"):
+        url_imagem = f"https://exemplo.com{url_imagem}"
+    
+    # Faz o download da imagem
+    response = requests.get(url_imagem)
+    nome_arquivo = "imagem_baixada.jpg"
+    with open(nome_arquivo, "wb") as file:
+        file.write(response.content)
+    print(f"Imagem baixada e salva como {nome_arquivo}")
+else:
+    print("Imagem com o atributo 'data-src' não encontrada.")
