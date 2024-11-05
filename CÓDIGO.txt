@@ -1,29 +1,5 @@
-import requests
-from datetime import datetime
-import os
-
-# Configuração inicial
-codigo = "CODIGO_DO_USUARIO"  # Código do funcionário
-url_base_imagem = "http://site.com/imagens/"  # URL base onde as imagens estão armazenadas
-output_folder = "imagens_aniversariantes"
-
-# Função para baixar a imagem diretamente
-def salvar_imagem(codigo):
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
-
-    # Monta a URL da imagem
-    img_url = f"{url_base_imagem}{codigo}.jpg"
-
-    # Faz a requisição da imagem
-    response = requests.get(img_url, timeout=10)
-    if response.status_code == 200:
-        filename = f"{output_folder}/{codigo}_{datetime.today().strftime('%Y-%m-%d')}.jpg"
-        with open(filename, 'wb') as handler:
-            handler.write(response.content)
-        print(f"Imagem salva como {filename}")
-    else:
-        print("Imagem não encontrada ou código inválido.")
-
-# Executar o processo
-salvar_imagem(codigo)
+proxies = {
+    "http": "http://seu_proxy:porta",
+    "https": "http://seu_proxy:porta",
+}
+response = requests.get(img_url, proxies=proxies)
