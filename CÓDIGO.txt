@@ -1,65 +1,7 @@
-import requests
-from bs4 import BeautifulSoup
-import os
+import http.client
 
-# URL do site que você quer acessar
-url = 'https://example.com'  # Substitua pelo URL desejado
-
-# Código que você deseja inserir
-codigo = 'klklklk'
-
-# Fazendo uma requisição GET para acessar a página
-response = requests.get(url)
-if response.status_code != 200:
-    print('Erro ao acessar o site:', response.status_code)
-else:
-    soup = BeautifulSoup(response.content, 'html.parser')
-
-    # Aqui, você precisa encontrar a caixa de texto onde insere o código.
-    # Isso pode variar de site para site.
-    # Supondo que o elemento seja um <input> com o id 'codigo_input'.
-    input_element = soup.find('input', id='codigo_input')
-    
-    # Agora você precisa descobrir como enviar o código para o servidor.
-    # Muitas vezes, isso é feito através de uma requisição POST.
-    # A URL para onde o formulário é enviado pode ser encontrada em um atributo 'action' de um <form>.
-    form_action = soup.find('form').get('action')
-
-    # Se a ação não for uma URL completa, pode ser necessário combiná-la com a URL base
-    if not form_action.startswith('http'):
-        form_action = url + form_action  # Ajustando a URL se necessário
-
-    # Criando o payload para o POST
-    payload = {
-        'codigo': codigo  # Ajuste o nome do campo conforme necessário
-    }
-
-    # Enviando a requisição POST
-    post_response = requests.post(form_action, data=payload)
-
-    # Verificando se a requisição foi bem-sucedida
-    if post_response.status_code == 200:
-        # Analisando a resposta
-        result_soup = BeautifulSoup(post_response.content, 'html.parser')
-
-        # Aqui, você precisa identificar onde a foto e as informações estão na página.
-        # Supondo que a foto esteja em um <img> com o id 'foto' e informações em um <div> com o id 'informacoes'.
-        foto_url = result_soup.find('img', id='foto')['src']
-        informacoes = result_soup.find('div', id='informacoes').text
-
-        # Imprimindo as informações
-        print('Informações:', informacoes)
-
-        # Baixando a foto
-        foto_response = requests.get(foto_url)
-        if foto_response.status_code == 200:
-            # Crie um diretório para salvar as fotos, se não existir
-            os.makedirs('fotos', exist_ok=True)
-            foto_path = os.path.join('fotos', 'foto.jpg')  # Nome do arquivo da foto
-            with open(foto_path, 'wb') as f:
-                f.write(foto_response.content)
-            print('Foto baixada com sucesso:', foto_path)
-        else:
-            print('Erro ao baixar a foto:', foto_response.status_code)
-    else:
-        print('Erro ao enviar o código:', post_response.status_code)
+conn = http.client.HTTPSConnection("example.com", 443)  # Substitua pelo domínio
+conn.request("GET", "/")
+response = conn.getresponse()
+data = response.read()
+print(data)
