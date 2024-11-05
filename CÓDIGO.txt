@@ -1,8 +1,11 @@
-from requests_ntlm import HttpNtlmAuth
-import requests
+import asyncio
+from pyppeteer import launch
 
-url = "http://site-corporativo.com/imagem"
-username = "DOMINIO\\seu_usuario"
-password = "sua_senha"
+async def acessar_pagina():
+    browser = await launch()
+    page = await browser.newPage()
+    await page.goto("http://url-do-site.com")
+    # Adicione aqui os passos para interagir com a página
+    await browser.close()
 
-response = requests.get(url, auth=HttpNtlmAuth(username, password))
+asyncio.get_event_loop().run_until_complete(acessar_pagina())
