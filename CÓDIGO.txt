@@ -1,0 +1,34 @@
+import pyautogui
+import time
+import pandas as pd
+from datetime import datetime
+
+# Carregar o arquivo Excel
+file_path = '/mnt/data/file-LRu056pNr2rI7EvS3P3yYPwG'
+df = pd.read_excel(file_path, sheet_name='Aniversariantes, Marcelo')
+
+# Filtrar os aniversariantes do dia
+hoje = datetime.today()
+mes_atual = hoje.month
+dia_atual = hoje.day
+aniversariantes_hoje = df[(df['Mês'] == mes_atual) & (df['Aniversário'] == dia_atual)]
+
+# Aguardar o site abrir e iniciar o processo
+time.sleep(5)
+
+for index, row in aniversariantes_hoje.iterrows():
+    num_func = str(row['NUMFUNC'])
+    
+    # Localize o campo de busca (com as coordenadas X e Y corretas) e clique nele
+    pyautogui.click(x=500, y=200)  # Altere as coordenadas conforme necessário
+    pyautogui.write(num_func)
+    pyautogui.press('enter')
+    
+    # Aguardar o carregamento do perfil
+    time.sleep(2)
+    
+    # Tirar screenshot da tela, caso a foto seja exibida diretamente
+    screenshot = pyautogui.screenshot()
+    screenshot.save(f"{num_func}_foto.png")
+
+print("Processo concluído.")
