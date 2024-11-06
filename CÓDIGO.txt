@@ -1,27 +1,11 @@
 import requests
 from bs4 import BeautifulSoup
 
-# URL da página onde a imagem está
-url_pagina = "https://exemplo.com/pagina"
-response = requests.get(url_pagina)
-soup = BeautifulSoup(response.text, "html.parser")
+response = requests.get('https://google.com')
+soup = BeautifulSoup(response.text, 'html.parser')
 
-# Encontre a tag de imagem (exemplo para o primeiro 'img')
-img_tag = soup.find("img")
-if img_tag and 'src' in img_tag.attrs:
-    url_imagem = img_tag['src']
-    
-    # Completar o URL se for relativo
-    if not url_imagem.startswith("http"):
-        url_imagem = f"https://exemplo.com{url_imagem}"
-    
-    # Nome do arquivo para salvar a imagem
-    nome_arquivo = "imagem_baixada.jpg"
-    
-    # Baixa a imagem
-    response = requests.get(url_imagem)
-    with open(nome_arquivo, "wb") as file:
-        file.write(response.content)
-    print("Imagem baixada e salva como", nome_arquivo)
-else:
-    print("Imagem não encontrada.")
+# Encontrar todos os links na página
+links = soup.find_all('a')
+
+for link in links:
+    print(link.get('href'))
