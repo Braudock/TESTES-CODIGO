@@ -1,18 +1,22 @@
-import requests
+pip install pyautogui
 
-# URL direta da imagem (substitua pela URL da imagem, se você a obtiver inspecionando o site)
-image_url = "https://example.com/path/to/image.jpg"  # Substitua com a URL exata da imagem
+pip install pyautogui keyboard
 
-# Caminho para salvar a imagem
-save_path = r'C:\Users\BRAUD\OneDrive\Área de Trabalho\PASTAS\foto_usuario.png'
+import pyautogui
+import keyboard
 
-# Faz o download da imagem
-response = requests.get(image_url)
+print("Posicione o mouse e pressione a tecla 'p' para capturar as coordenadas. Pressione 'q' para sair.")
 
-if response.status_code == 200:
-    # Salva a imagem no caminho especificado
-    with open(save_path, 'wb') as file:
-        file.write(response.content)
-    print("Imagem salva com sucesso!")
-else:
-    print("Falha ao baixar a imagem.")
+while True:
+    if keyboard.is_pressed('p'):  # Verifica se a tecla 'p' foi pressionada
+        x, y = pyautogui.position()
+        print(f"Coordenadas do mouse: x={x}, y={y}")
+        
+        # Aguarda até que a tecla 'p' seja liberada para evitar múltiplas capturas
+        while keyboard.is_pressed('p'):
+            pass
+    
+    # Finaliza o programa quando a tecla 'q' é pressionada
+    if keyboard.is_pressed('q'):
+        print("Programa finalizado.")
+        break
