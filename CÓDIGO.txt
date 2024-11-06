@@ -1,0 +1,32 @@
+Sub AbrirChromeComURL()
+    On Error Resume Next
+
+    Dim ShellApp As Object
+    Dim URL As String
+    Dim Codigo As String
+    Dim ChromePath As String
+    Dim JSCode As String
+
+    ' Caminho do Chrome
+    ChromePath = "C:\Program Files\Google\Chrome\Application\chrome.exe"
+    
+    ' URL e código a ser inserido
+    URL = ""
+    Codigo = "123456" ' Substitua pelo código que você deseja inserir
+
+    ' Definir o JavaScript a ser injetado
+    JSCode = "javascript:document.querySelector('input[type=""text""]').value='" & Codigo & "';"
+
+    ' Abrir Chrome com URL e injetar o JS
+    Set ShellApp = CreateObject("Shell.Application")
+    ShellApp.ShellExecute ChromePath, URL & " " & JSCode, "", "open", 1
+
+    ' Verificar erro ao abrir o Chrome
+    If Err.Number <> 0 Then
+        MsgBox "Ocorreu um erro ao abrir o Chrome: " & Err.Description
+        Exit Sub
+    End If
+
+    ' Limpar variáveis
+    Set ShellApp = Nothing
+End Sub
