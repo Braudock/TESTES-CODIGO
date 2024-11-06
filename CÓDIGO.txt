@@ -126,3 +126,47 @@ if response.status_code == 200:
                 print("Erro ao baixar a imagem.")
 else:
     print(f"Erro ao acessar o site. Status code: {response.status_code}")
+
+************************************************
+
+import requests
+from bs4 import BeautifulSoup
+import os
+
+# URL do site
+url = "https://itaudigitalworkplace.lightning.force.com/lightning/n/Cad_Voc"  # Corrigido a URL
+
+# Enviar a requisição para acessar a página
+try:
+    response = requests.get(url)
+    
+    # Verifique se a requisição foi bem-sucedida
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.text, "html.parser")
+        
+        # Encontrar todas as imagens na página (tags <img>)
+        img_tags = soup.find_all("img")
+        
+        # Encontrar a URL da primeira imagem
+        for img_tag in img_tags:
+            img_url = img_tag.get("src")
+            if img_url:
+                # Baixar a imagem
+                img_response = requests.get(img_url)
+                
+                # Verificar se a imagem foi baixada com sucesso
+                if img_response.status_code == 200:
+                    # Salvar a imagem no diretório desejado
+                    caminho_imagem = r'C:\Users\Irsoloj\OneDrive - Banco Itaú SA\Área de Trabalho\PASTAS\imagem_unsplash.jpg'
+                    with open(caminho_imagem, 'wb') as f:
+                        f.write(img_response.content)
+                    print(f"Imagem salva em: {caminho_imagem}")
+                    break  # Apenas salva a primeira imagem encontrada
+                else:
+                    print("Erro ao baixar a imagem.")
+    else:
+        print(f"Erro ao acessar o site. Status code: {response.status_code}")
+except requests.exceptions.ProxyError as e:
+    print("Erro de Proxy. Verifique as configurações da sua rede ou consulte o administrador de TI.")
+except Exception as e:
+    print(f"Erro: {e}")
