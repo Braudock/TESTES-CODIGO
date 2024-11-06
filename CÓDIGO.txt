@@ -1,0 +1,58 @@
+import pyautogui as pag
+import openpyxl
+import datetime
+import time
+import os
+
+# Caminho do arquivo Excel e nome da aba
+excel_file_path = 'C:\\caminho\\da\\sua\\planilha.xlsx'
+sheet_name = 'NomeDaAba'  # Insira o nome da aba aqui
+url = "https://url.do.site"  # Insira a URL do site aqui
+save_folder = ''
+
+# Abre a planilha
+wb = openpyxl.load_workbook(excel_file_path)
+sheet = wb[sheet_name]
+
+# Data de hoje
+today = datetime.datetime.now().date()
+
+# Função para salvar imagem
+def save_image(file_name):
+    pag.rightClick()
+    time.sleep(1)
+    pag.press('down', presses=3)  # Navega até "Salvar imagem como"
+    time.sleep(1)
+    pag.press('enter')
+    time.sleep(1)
+    pag.write(os.path.join(save_folder, file_name))
+    time.sleep(1)
+    pag.press('enter')  # Pressiona Enter para salvar
+
+# Itera sobre as linhas da planilha para verificar aniversariantes
+for row in sheet.iter_rows(min_row=2, values_only=True):
+    codigo_colaborador, aniversario = row[0], row[4]
+    
+    # Verifica se a data de aniversário é hoje
+    if aniversario and aniversario.date() == today:
+        # Abre o navegador e vai para a URL
+        os.system(f'start chrome {url}')
+        time.sleep(15)  # Espera o navegador carregar completamente
+        
+        # Localiza o campo de texto e insere o código do colaborador
+        pag.click(x=100, y=200)  # Substitua com as coordenadas do campo de texto
+        time.sleep(1)
+        pag.write(str(codigo_colaborador))
+        pag.press('enter')
+        time.sleep(3)  # Aguarda a página carregar
+        
+        # Localiza a imagem nas coordenadas e salva corretamente
+        pag.click(x=150, y=300)  # Substitua com as coordenadas da imagem
+        time.sleep(1)
+        save_image(f"aniversariante_{codigo_colaborador}.jpg")
+        
+        # Fecha a aba do navegador
+        pag.hotkey('ctrl', 'w')
+        time.sleep(1)
+
+print("Processo concluído.")
