@@ -1,0 +1,18 @@
+import requests
+
+# URL direta da imagem (substitua pela URL da imagem, se você a obtiver inspecionando o site)
+image_url = "https://example.com/path/to/image.jpg"  # Substitua com a URL exata da imagem
+
+# Caminho para salvar a imagem
+save_path = r'C:\Users\BRAUD\OneDrive\Área de Trabalho\PASTAS\foto_usuario.png'
+
+# Faz o download da imagem
+response = requests.get(image_url)
+
+if response.status_code == 200:
+    # Salva a imagem no caminho especificado
+    with open(save_path, 'wb') as file:
+        file.write(response.content)
+    print("Imagem salva com sucesso!")
+else:
+    print("Falha ao baixar a imagem.")
