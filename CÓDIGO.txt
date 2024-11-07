@@ -1,0 +1,172 @@
+import requests
+from bs4 import BeautifulSoup
+
+response = requests.get('https://google.com')
+soup = BeautifulSoup(response.text, 'html.parser')
+
+# Encontrar todos os links na página
+links = soup.find_all('a')
+
+for link in links:
+    print(link.get('href'))
+***************************************************************************************************************
+
+import requests
+from bs4 import BeautifulSoup
+import os
+
+# Função para buscar e salvar a foto
+def salvar_foto(funcional):
+    # URL do site que será acessado
+    url = 'URL_DO_SITE'  # Substitua pela URL real do site da empresa
+
+    # Enviar a requisição para obter o conteúdo da página
+    response = requests.get(url)
+
+    # Verifique se a requisição foi bem-sucedida
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        # Encontre o formulário ou campo de busca para o número funcional
+        # (Esse é um exemplo, você precisará ajustar de acordo com o HTML do site)
+        campo_funcional = soup.find('input', {'name': 'campo_funcional'})  # Substitua pelo nome correto
+
+        # Preencher o número funcional
+        dados = {'campo_funcional': funcional}  # Substitua pelo nome do campo correto
+
+        # Enviar a requisição com o número funcional para buscar a foto
+        response_busca = requests.post(url, data=dados)
+
+        # Se a busca foi bem-sucedida
+        if response_busca.status_code == 200:
+            soup_busca = BeautifulSoup(response_busca.text, 'html.parser')
+
+            # Encontrar a URL da foto (ajuste conforme o HTML da página)
+            img_tag = soup_busca.find('img', {'id': 'foto_funcionario'})  # Substitua pelo ID correto
+            if img_tag:
+                img_url = img_tag['src']
+
+                # Baixar a imagem
+                img_response = requests.get(img_url)
+
+                # Salvar a imagem no diretório desejado
+                if img_response.status_code == 200:
+                    caminho_imagem = r'C:\Users\BRAUD\OneDrive\Área de Trabalho\PASTAS\foto_colaborador.jpg'  # Ajuste o nome e caminho
+                    with open(caminho_imagem, 'wb') as f:
+                        f.write(img_response.content)
+                    print(f'Imagem salva em: {caminho_imagem}')
+                else:
+                    print("Erro ao baixar a imagem.")
+            else:
+                print("Imagem não encontrada na página.")
+        else:
+            print("Erro ao enviar a requisição de busca.")
+    else:
+        print("Erro ao acessar o site.")
+
+# Chamar a função passando o número da funcional
+funcional = input("Digite o número da funcional: ")
+salvar_foto(funcional)
+
+
+********************************************************************************************************************************
+
+import requests
+
+def salvar_foto(numero_funcional):
+    url_base = "https://www.empresa.com.br/busca?funcional="
+    url_completa = url_base + numero_funcional
+
+    response = requests.get(url_completa)
+    # Assumindo que o URL da imagem está em um elemento com id="foto_colaborador"
+    # Adapte o XPath ou CSS selector conforme a estrutura do seu HTML
+    # Utilize bibliotecas como BeautifulSoup para parsear o HTML e extrair o URL
+    # ...
+
+    with open(f"fotos/{numero_funcional}.jpg", "wb") as f:
+        f.write(response.content)
+
+
+********************************************************************************************************************************
+
+import requests
+from bs4 import BeautifulSoup
+import os
+
+# URL do site do Unsplash
+url = 'https://unsplash.com/s/photos/landscape'  # Página com imagens de paisagens, por exemplo
+
+# Enviar a requisição para acessar a página
+response = requests.get(url)
+
+# Verifique se a requisição foi bem-sucedida
+if response.status_code == 200:
+    soup = BeautifulSoup(response.text, 'html.parser')
+
+    # Encontrar todas as imagens na página (tags <img>)
+    img_tags = soup.find_all('img')
+
+    # Encontrar a URL da primeira imagem
+    for img_tag in img_tags:
+        img_url = img_tag.get('src')
+
+        if img_url:
+            # Baixar a imagem
+            img_response = requests.get(img_url)
+
+            # Verificar se a imagem foi baixada com sucesso
+            if img_response.status_code == 200:
+                # Salvar a imagem no diretório desejado
+                caminho_imagem = r'C:\Users\BRAUD\OneDrive\Área de Trabalho\PASTAS\imagem_unsplash.jpg'
+                with open(caminho_imagem, 'wb') as f:
+                    f.write(img_response.content)
+                print(f'Imagem salva em: {caminho_imagem}')
+                break  # Apenas salva a primeira imagem encontrada
+            else:
+                print("Erro ao baixar a imagem.")
+else:
+    print(f"Erro ao acessar o site. Status code: {response.status_code}")
+
+************************************************
+
+import requests
+from bs4 import BeautifulSoup
+import os
+
+# URL do site
+url = "https://itaudigitalworkplace.lightning.force.com/lightning/n/Cad_Voc"  # Corrigido a URL
+
+# Enviar a requisição para acessar a página
+try:
+    response = requests.get(url)
+    
+    # Verifique se a requisição foi bem-sucedida
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.text, "html.parser")
+        
+        # Encontrar todas as imagens na página (tags <img>)
+        img_tags = soup.find_all("img")
+        
+        # Encontrar a URL da primeira imagem
+        for img_tag in img_tags:
+            img_url = img_tag.get("src")
+            if img_url:
+                # Baixar a imagem
+                img_response = requests.get(img_url)
+                
+                # Verificar se a imagem foi baixada com sucesso
+                if img_response.status_code == 200:
+                    # Salvar a imagem no diretório desejado
+                    caminho_imagem = r'C:\Users\Irsoloj\OneDrive - Banco Itaú SA\Área de Trabalho\PASTAS\imagem_unsplash.jpg'
+                    with open(caminho_imagem, 'wb') as f:
+                        f.write(img_response.content)
+                    print(f"Imagem salva em: {caminho_imagem}")
+                    break  # Apenas salva a primeira imagem encontrada
+                else:
+                    print("Erro ao baixar a imagem.")
+    else:
+        print(f"Erro ao acessar o site. Status code: {response.status_code}")
+except requests.exceptions.ProxyError as e:
+    print("Erro de Proxy. Verifique as configurações da sua rede ou consulte o administrador de TI.")
+except Exception as e:
+    print(f"Erro: {e}")
