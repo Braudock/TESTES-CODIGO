@@ -1,1 +1,10 @@
-pip install PyQtWebEngine
+import requests
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+
+# Suprimir o aviso de verificação SSL
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
+proxy = {
+   
+
+todos = requests.get("https://jsonplaceholder.typicode.com/todos", proxies=proxy, verify=False)
