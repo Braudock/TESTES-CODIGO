@@ -1,0 +1,11 @@
+import requests
+import urllib3
+from requests import Response
+
+# Ignora o aviso de segurança
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+
+
+todos = requests.get("https://www.google.com/", proxies=proxy, verify=False)
+print(todos.status_code)
