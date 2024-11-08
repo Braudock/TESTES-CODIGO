@@ -1,0 +1,31 @@
+import asyncio
+from pyppeteer import launch
+from PIL import Image
+
+async def captura_pagina_completa(url, caminho_salvar):
+    # Lança o navegador em modo headless
+    navegador = await launch(headless=True, executablePath='C:/Program Files/Google/Chrome/Application/chrome.exe')
+    pagina = await navegador.newPage()
+    
+    # Define as configurações para capturar a página completa
+    await pagina.goto(url)
+    await pagina.setViewport({"width": 1200, "height": 3000})
+    
+    # Tira a captura de tela da página completa
+    caminho_temp = 'pagina_temp.png'
+    await pagina.screenshot({'path': caminho_temp, 'fullPage': True})
+    
+    # Converte a imagem para JPG
+    img = Image.open(caminho_temp)
+    img = img.convert("RGB")
+    img.save(caminho_salvar, "JPEG")
+    
+    await navegador.close()
+    print(f"A captura de {url} foi salva em {caminho_salvar}")
+
+# Define a URL e o caminho para salvar
+url = "https://exemplo.com"
+caminho_salvar = "C:/Users/BRAUD/OneDrive/Área de Trabalho/PASTAS/captura_pagina.jpg"
+
+# Executa o código
+asyncio.get_event_loop().run_until_complete(captura_pagina_completa(url, caminho_salvar))
