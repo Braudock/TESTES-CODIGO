@@ -1,10 +1,10 @@
 import requests
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
+import warnings
 
-# Suprimir o aviso de verificação SSL
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+# Suprimir os avisos SSL
+warnings.filterwarnings("ignore", message="Unverified HTTPS request")
 
 proxy = {
-   
+    
 
 todos = requests.get("https://jsonplaceholder.typicode.com/todos", proxies=proxy, verify=False)
