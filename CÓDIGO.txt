@@ -1,0 +1,37 @@
+import requests
+
+PROXIES = {
+    "http": "http://RACF:SENHA@proxynew.itau:8080",
+    "https": "https://RACF:SENHA@proxynew.itau:8080"
+}
+
+headers = {
+    "Content-Type": "application/json",
+    "Accept-Encoding": "deflate"
+}
+
+payload = {}  # Substitua pelo conteúdo que deseja enviar, por exemplo: {"chave": "valor"}
+
+response = requests.request("GET", "https://uol.com.br", headers=headers, data=payload, proxies=PROXIES, verify=False)
+print(response.status_code)
+print(response.text)
+
+
+
+******************************************
+
+import requests
+
+PROXIES = {
+    "http": "http://RACF:SENHA@proxynew.itau:8080",
+    "https": "https://RACF:SENHA@proxynew.itau:8080"
+}
+
+headers = {
+    "Content-Type": "application/json",
+    "Accept-Encoding": "deflate"
+}
+
+response = requests.request("GET", "https://uol.com.br", headers=headers, proxies=PROXIES, verify=False)
+print(response.status_code)
+print(response.text)
