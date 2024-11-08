@@ -1,8 +1,18 @@
-# Verifica se a requisição foi bem-sucedida
+# Faz a requisição para a URL da imagem
+response = requests.get(url_imagem, proxies=proxy, verify=False)
+
+# Verifica o conteúdo da resposta
 if response.status_code == 200:
-    # Abre o arquivo em modo de escrita binária e salva o conteúdo da imagem
-    with open(caminho_para_salvar, "wb") as file:
-        file.write(response.content)
-    print("Imagem baixada e salva com sucesso!")
+    # Exibe os primeiros 500 caracteres do conteúdo para verificar o que foi recebido
+    print(response.text[:500])  # Use `response.content` para conteúdo binário se não for texto
+
+    # Salva o conteúdo apenas se for uma imagem
+    content_type = response.headers.get("Content-Type")
+    if content_type and "image" in content_type:
+        with open(caminho_para_salvar, "wb") as file:
+            file.write(response.content)
+        print("Imagem baixada e salva com sucesso!")
+    else:
+        print("O conteúdo recebido não é uma imagem. Tipo de conteúdo:", content_type)
 else:
     print("Falha ao baixar a imagem. Código de status:", response.status_code)
