@@ -1,0 +1,24 @@
+import requests
+
+# URL da imagem que você deseja baixar
+url_imagem = "https://exemplo.com/caminho/para/imagem.jpg"
+
+# Nome do arquivo onde a imagem será salva
+caminho_salvar = "imagem_baixada.jpg"  # Exemplo: 'C:/Users/SeuUsuario/Downloads/imagem_baixada.jpg'
+
+# Configuração de proxy, se necessário
+proxy = {
+    "http":
+
+# Fazer a requisição GET para obter a imagem
+response = requests.get(url_imagem, proxies=proxy, verify=False, stream=True)
+
+# Verificar se a requisição foi bem-sucedida
+if response.status_code == 200:
+    # Abrir o arquivo em modo de escrita binária e salvar o conteúdo
+    with open(caminho_salvar, "wb") as file:
+        for chunk in response.iter_content(1024):  # Baixar em blocos de 1024 bytes
+            file.write(chunk)
+    print(f"Imagem salva com sucesso em: {caminho_salvar}")
+else:
+    print(f"Erro ao baixar a imagem. Status code: {response.status_code}")
