@@ -1,20 +1,8 @@
-import requests
-import urllib3
-
-# Ignora o aviso de segurança
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
-
-
-# URL da imagem que você quer baixar
-url_imagem = "https://www.exemplo.com/imagem.jpg"
-# Nome do arquivo para salvar a imagem
-caminho_para_salvar = "C:/imagem_baixada.jpg"
-
-# Faz a requisição para a URL da imagem
-response = requests.get(url_imagem, proxies=proxy, verify=False)
-
 # Verifica se a requisição foi bem-sucedida
 if response.status_code == 200:
     # Abre o arquivo em modo de escrita binária e salva o conteúdo da imagem
-    with open(caminho_para_salvar, "wb") as
+    with open(caminho_para_salvar, "wb") as file:
+        file.write(response.content)
+    print("Imagem baixada e salva com sucesso!")
+else:
+    print("Falha ao baixar a imagem. Código de status:", response.status_code)
