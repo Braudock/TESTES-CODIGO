@@ -1,38 +1,22 @@
-import pyautogui
-import pyperclip
-import time
-import webbrowser
+import asyncio
+from pyppeteer import launch
 
-def acessar_url_e_inserir_codigo(url, codigo, texto_identificador):
-    # Abre o navegador na URL desejada
-    webbrowser.open(url)
-    
-    # Aguarda o navegador carregar a página
-    time.sleep(5)
-    
-    # Copia o código para a área de transferência
-    pyperclip.copy(codigo)
-    
-    # Abre o recurso de pesquisa da página (Ctrl + F)
-    pyautogui.hotkey("ctrl", "f")
-    time.sleep(1)
-    
-    # Digita o identificador do campo de texto
-    pyperclip.copy(texto_identificador)
-    pyautogui.hotkey("ctrl", "v")
-    time.sleep(1)
-    
-    # Pressiona "Esc" para fechar a barra de pesquisa
-    pyautogui.press("esc")
-    
-    # Pressiona "Tab" para focar o campo de texto encontrado e cola o código
-    pyautogui.press("tab")
-    time.sleep(1)
-    pyautogui.hotkey("ctrl", "v")  # Cola o código copiado
-    pyautogui.press("enter")  # Envia (caso seja necessário)
+async def preencher_campo():
+    # Inicia o navegador
+    browser = await launch(headless=False)  # headless=False permite ver a ação no navegador
+    page = await browser.newPage()
 
-# Exemplo de uso
-url = "http://sua-url-aqui.com"
-codigo = "123456"
-texto_identificador = "Nome ou label do campo"  # Placeholder ou texto que identifica o campo
-acessar_url_e_inserir_codigo(url, codigo, texto_identificador)
+    # Acessa a página desejada
+    await page.goto('')
+
+    # Aguarda a página carregar completamente
+    await page.waitForSelector('input[placeholder="Procure um Colaborador"]')
+
+    # Insere o texto no campo de busca
+    await page.type('input[placeholder="Procure um Colaborador"]', 'nome do colaborador')
+
+    # Opcional: Fecha o navegador após a execução
+    # await browser.close()
+
+# Executa a função assíncrona
+asyncio.get_event_loop().run_until_complete(preencher_campo())
