@@ -1,18 +1,45 @@
-# Faz a requisição para a URL da imagem
-response = requests.get(url_imagem, proxies=proxy, verify=False)
+import requests
+import urllib3
 
-# Verifica o conteúdo da resposta
-if response.status_code == 200:
-    # Exibe os primeiros 500 caracteres do conteúdo para verificar o que foi recebido
-    print(response.text[:500])  # Use `response.content` para conteúdo binário se não for texto
+# Ignora o aviso de segurança
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-    # Salva o conteúdo apenas se for uma imagem
-    content_type = response.headers.get("Content-Type")
-    if content_type and "image" in content_type:
+# Proxy
+proxy = {
+    "
+
+# Inicia uma sessão para manter cookies de autenticação
+session = requests.Session()
+
+# URL da página de login (exemplo; ajuste conforme necessário)
+url_login = "https://itaudigitalworkplace.file.force.com/login"
+# Dados de login (ajuste conforme necessário)
+dados_login = {
+    "username": "seu_usuario",
+    "password": "sua_senha"
+}
+
+# Faz o login
+response_login = session.post(url_login, data=dados_login, proxies=proxy, verify=False)
+
+# Verifica se o login foi bem-sucedido
+if response_login.status_code == 200:
+    print("Login realizado com sucesso!")
+
+    # URL da imagem que você quer baixar
+    url_imagem = ""
+    # Caminho para salvar a imagem
+    caminho_para_salvar = "C:/imagem_baixada.jpg"
+
+    # Tenta baixar a imagem com a sessão autenticada
+    response = session.get(url_imagem, proxies=proxy, verify=False)
+
+    # Verifica o conteúdo da resposta
+    if response.status_code == 200 and "image" in response.headers.get("Content-Type", ""):
         with open(caminho_para_salvar, "wb") as file:
             file.write(response.content)
         print("Imagem baixada e salva com sucesso!")
     else:
-        print("O conteúdo recebido não é uma imagem. Tipo de conteúdo:", content_type)
+        print("O conteúdo recebido não é uma imagem. Tipo de conteúdo:", response.headers.get("Content-Type"))
 else:
-    print("Falha ao baixar a imagem. Código de status:", response.status_code)
+    print("Falha no login. Código de status:", response_login.status_code)
