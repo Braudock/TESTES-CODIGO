@@ -1,7 +1,9 @@
 data tabela_original;
     set tabela_original;
-    /* Converte a própria coluna para o tipo data */
-    coluna_caractere = input(coluna_caractere, yymmdd10.);
-    /* Define o formato de exibição como data */
-    format coluna_caractere date9.;
+    /* Converte a coluna de caractere para data em uma coluna temporária */
+    coluna_temp = input(coluna_caractere, yymmdd10.);
+    format coluna_temp date9.;
+    /* Exclui a coluna original e renomeia a coluna temporária */
+    drop coluna_caractere;
+    rename coluna_temp = coluna_caractere;
 run;
