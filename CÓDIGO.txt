@@ -1,17 +1,22 @@
 import pyautogui
-import os
+import time
 
-# Caminho da pasta onde deseja salvar a imagem
-pasta_destino = r""
-nome_arquivo = "imagem_capturada.jpg"
+print("Posicione o cursor do mouse sobre o canto superior esquerdo da área que deseja capturar.")
+time.sleep(5)  # Tempo para posicionar o cursor
 
-# Caminho completo do arquivo
-caminho_completo = os.path.join(pasta_destino, nome_arquivo)
+# Captura as coordenadas do canto superior esquerdo
+x1, y1 = pyautogui.position()
+print(f"Canto superior esquerdo: ({x1}, {y1})")
 
-# Captura uma área específica da tela
-left, top, width, height = 100, 100, 300, 300  # Defina as coordenadas e tamanho da área
-screenshot = pyautogui.screenshot(region=(left, top, width, height))
+print("Agora, posicione o cursor do mouse sobre o canto inferior direito da área que deseja capturar.")
+time.sleep(5)  # Tempo para posicionar o cursor
 
-# Salva a captura na pasta especificada
-screenshot.save(caminho_completo)
-print(f"Imagem capturada e salva em: {caminho_completo}")
+# Captura as coordenadas do canto inferior direito
+x2, y2 = pyautogui.position()
+print(f"Canto inferior direito: ({x2}, {y2})")
+
+# Calcula a largura e a altura da área
+width = x2 - x1
+height = y2 - y1
+
+print(f"Coordenadas da área para captura: left={x1}, top={y1}, width={width}, height={height}")
