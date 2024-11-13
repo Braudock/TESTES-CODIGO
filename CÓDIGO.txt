@@ -1,6 +1,17 @@
 import pyautogui
+import os
 
-# Captura a tela inteira e salva a imagem
-screenshot = pyautogui.screenshot()
-screenshot.save("imagem_capturada.jpg")
-print("Imagem capturada com sucesso!")
+# Caminho da pasta onde deseja salvar a imagem
+pasta_destino = r""
+nome_arquivo = "imagem_capturada.jpg"
+
+# Caminho completo do arquivo
+caminho_completo = os.path.join(pasta_destino, nome_arquivo)
+
+# Captura uma área específica da tela
+left, top, width, height = 100, 100, 300, 300  # Defina as coordenadas e tamanho da área
+screenshot = pyautogui.screenshot(region=(left, top, width, height))
+
+# Salva a captura na pasta especificada
+screenshot.save(caminho_completo)
+print(f"Imagem capturada e salva em: {caminho_completo}")
