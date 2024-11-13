@@ -23,16 +23,23 @@ time.sleep(1)
 
 # Navegar no menu para selecionar "Salvar imagem como"
 # Pressione 'down' algumas vezes até chegar na opção "Salvar imagem como"
-for _ in range(3):  # Ajuste o número de vezes conforme necessário
-    pyautogui.press('down')
+pyautogui.press('down')  # Ajuste para a posição correta da opção no menu
 time.sleep(1)
 
 # Confirmar a seleção com Enter
 pyautogui.press('enter')
 time.sleep(1)
 
-# Passo 4: Ir para a coordenada X=791, Y=478 e clicar
-pyautogui.click(791, 478)
+# Passo 4: Ir para a coordenada X=809, Y=474 e clicar com o botão direito para selecionar "Salvar como"
+pyautogui.rightClick(809, 474)
+time.sleep(1)
+
+# Pressionar 'down' para selecionar "Salvar como"
+pyautogui.press('down')
+time.sleep(1)
+
+# Confirmar a seleção com Enter
+pyautogui.press('enter')
 time.sleep(1)
 
 # Passo 5: Ir para a coordenada X=160, Y=398, clicar e escrever "IMAGEM"
@@ -41,11 +48,11 @@ time.sleep(1)
 pyautogui.write("IMAGEM")
 time.sleep(1)
 
-# Passo 6: Ir para a coordenada Y=501 e clicar
+# Passo 6: Ir para a coordenada X=160, Y=501 e clicar
 pyautogui.click(160, 501)
 time.sleep(1)
 
-# Passo 7: Ir para a coordenada X=782 e finalizar
-pyautogui.click(782, 398)  # Coord Y=398 foi assumida pelo padrão, ajuste se necessário
+# Passo 7: Ir para a coordenada X=782, Y=398 e finalizar
+pyautogui.click(782, 398)
 
 print("A automação foi concluída.")
