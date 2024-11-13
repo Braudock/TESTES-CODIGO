@@ -17,11 +17,18 @@ time.sleep(1)
 pyautogui.write("")
 time.sleep(1)
 
-# Passo 3: Ir para a coordenada X=677, Y=437, clicar com o botão direito e salvar imagem
+# Passo 3: Ir para a coordenada X=677, Y=437, clicar com o botão direito e selecionar "Salvar imagem como"
 pyautogui.rightClick(677, 437)
 time.sleep(1)
-pyautogui.press('down')  # Navega no menu do botão direito
-pyautogui.press('enter')  # Seleciona "Salvar imagem como"
+
+# Navegar no menu para selecionar "Salvar imagem como"
+# Pressione 'down' algumas vezes até chegar na opção "Salvar imagem como"
+for _ in range(3):  # Ajuste o número de vezes conforme necessário
+    pyautogui.press('down')
+time.sleep(1)
+
+# Confirmar a seleção com Enter
+pyautogui.press('enter')
 time.sleep(1)
 
 # Passo 4: Ir para a coordenada X=791, Y=478 e clicar
