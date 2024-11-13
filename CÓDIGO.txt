@@ -1,0 +1,65 @@
+import pandas as pd
+import webbrowser
+import pyautogui
+import os
+import time
+from datetime import datetime
+
+# Função para verificar aniversários e obter os números e nomes dos funcionários
+def obter_dados_funcionarios(caminho_planilha, nome_planilha):
+    # Lê a planilha
+    df = pd.read_excel(os.path.join(caminho_planilha, nome_planilha))
+
+    # Data de hoje
+    hoje = datetime.today().strftime('%Y-%m-%d')
+
+    # Verifica os aniversariantes de hoje
+    aniversariantes = df[df['Aniversário'].apply(lambda x: x.strftime('%Y-%m-%d') == hoje)]
+    
+    # Retorna uma lista com os números e nomes dos funcionários
+    return aniversariantes[['NUMFUNC', 'NOMFUNC']].values
+
+# Caminho e nome da planilha
+caminho_planilha = r"C:\caminho\para\planilha"  # Atualize com o caminho correto
+nome_planilha = "nome_da_planilha.xlsx"  # Atualize com o nome correto da planilha
+
+# Obtém os números e nomes dos funcionários com aniversário hoje
+dados_funcionarios = obter_dados_funcionarios(caminho_planilha, nome_planilha)
+
+if len(dados_funcionarios) > 0:
+    for numero_funcionario, nome_funcionario in dados_funcionarios:
+        # URL a ser aberta
+        url = "https://"
+        webbrowser.open(url)
+
+        # Aguardar a página carregar
+        time.sleep(5)
+
+        # Passo 2: Ir para a coordenada X=466, Y=295 e clicar
+        pyautogui.click(466, 295)
+        time.sleep(5)
+
+        # Escrever o código do funcionário
+        pyautogui.write(str(numero_funcionario))
+        time.sleep(5)
+
+        # Passo 3: Ir para a coordenada X=809, Y=475 e clicar
+        pyautogui.click(809, 475)
+        time.sleep(8)
+
+        # Etapa 4: Capturar a área específica da tela
+        # Caminho da pasta onde deseja salvar a imagem
+        pasta_destino = r""
+        nome_arquivo = f"imagem_capturada_{nome_funcionario}.jpg"  # Nome da imagem com o nome do funcionário
+        caminho_completo = os.path.join(pasta_destino, nome_arquivo)
+
+        # Coordenadas e tamanho da área a ser capturada
+        left, top, width, height = 85, 337, 98, 124
+        screenshot = pyautogui.screenshot(region=(left, top, width, height))
+
+        # Salva a captura na pasta especificada
+        screenshot.save(caminho_completo)
+
+        print(f"Imagem capturada e salva em: {caminho_completo}")
+else:
+    print("Nenhum aniversariante encontrado para hoje.")
