@@ -1,0 +1,44 @@
+import pyautogui
+import webbrowser
+import time
+
+# Passo 1: Abrir a URL
+url = "https://exemplo.com"  # Insira a URL desejada aqui
+webbrowser.open(url)
+
+# Aguardar a página carregar
+time.sleep(5)  # Ajuste o tempo de acordo com a velocidade de carregamento da página
+
+# Passo 2: Ir para a coordenada X=466, Y=295 e clicar
+pyautogui.click(466, 295)
+time.sleep(1)
+
+# Escrever o código ""
+pyautogui.write("")
+time.sleep(1)
+
+# Passo 3: Ir para a coordenada X=677, Y=437, clicar com o botão direito e salvar imagem
+pyautogui.rightClick(677, 437)
+time.sleep(1)
+pyautogui.press('down')  # Navega no menu do botão direito
+pyautogui.press('enter')  # Seleciona "Salvar imagem como"
+time.sleep(1)
+
+# Passo 4: Ir para a coordenada X=791, Y=478 e clicar
+pyautogui.click(791, 478)
+time.sleep(1)
+
+# Passo 5: Ir para a coordenada X=160, Y=398, clicar e escrever "IMAGEM"
+pyautogui.click(160, 398)
+time.sleep(1)
+pyautogui.write("IMAGEM")
+time.sleep(1)
+
+# Passo 6: Ir para a coordenada Y=501 e clicar
+pyautogui.click(160, 501)
+time.sleep(1)
+
+# Passo 7: Ir para a coordenada X=782 e finalizar
+pyautogui.click(782, 398)  # Coord Y=398 foi assumida pelo padrão, ajuste se necessário
+
+print("A automação foi concluída.")
