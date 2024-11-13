@@ -1,25 +1,19 @@
-pip install keyboard
-
-
 import pyautogui
-import keyboard
+import os
 
-print("Posicione o cursor do mouse sobre o canto superior esquerdo da área e pressione 'Enter' para capturar.")
+# Caminho da pasta onde deseja salvar a imagem
+pasta_destino = r""
+nome_arquivo = "imagem_capturada.jpg"
 
-# Aguardando o usuário pressionar 'Enter' para capturar o canto superior esquerdo
-keyboard.wait('enter')
-x1, y1 = pyautogui.position()
-print(f"Canto superior esquerdo capturado em: ({x1}, {y1})")
+# Caminho completo do arquivo
+caminho_completo = os.path.join(pasta_destino, nome_arquivo)
 
-print("Agora, posicione o cursor do mouse sobre o canto inferior direito da área e pressione 'Enter' para capturar.")
+# Coordenadas e tamanho da área da imagem
+left, top, width, height = 85, 337, 98, 124
 
-# Aguardando o usuário pressionar 'Enter' para capturar o canto inferior direito
-keyboard.wait('enter')
-x2, y2 = pyautogui.position()
-print(f"Canto inferior direito capturado em: ({x2}, {y2})")
+# Captura a área específica da tela
+screenshot = pyautogui.screenshot(region=(left, top, width, height))
 
-# Calcula a largura e a altura da área
-width = x2 - x1
-height = y2 - y1
-
-print(f"Coordenadas da área para captura: left={x1}, top={y1}, width={width}, height={height}")
+# Salva a captura na pasta especificada
+screenshot.save(caminho_completo)
+print(f"Imagem capturada e salva em: {caminho_completo}")
