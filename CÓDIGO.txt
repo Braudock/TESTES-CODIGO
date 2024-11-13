@@ -1,19 +1,22 @@
+pip install keyboard
+
+
 import pyautogui
-import time
+import keyboard
 
-print("Posicione o cursor do mouse sobre o canto superior esquerdo da área que deseja capturar.")
-time.sleep(5)  # Tempo para posicionar o cursor
+print("Posicione o cursor do mouse sobre o canto superior esquerdo da área e pressione 'Enter' para capturar.")
 
-# Captura as coordenadas do canto superior esquerdo
+# Aguardando o usuário pressionar 'Enter' para capturar o canto superior esquerdo
+keyboard.wait('enter')
 x1, y1 = pyautogui.position()
-print(f"Canto superior esquerdo: ({x1}, {y1})")
+print(f"Canto superior esquerdo capturado em: ({x1}, {y1})")
 
-print("Agora, posicione o cursor do mouse sobre o canto inferior direito da área que deseja capturar.")
-time.sleep(5)  # Tempo para posicionar o cursor
+print("Agora, posicione o cursor do mouse sobre o canto inferior direito da área e pressione 'Enter' para capturar.")
 
-# Captura as coordenadas do canto inferior direito
+# Aguardando o usuário pressionar 'Enter' para capturar o canto inferior direito
+keyboard.wait('enter')
 x2, y2 = pyautogui.position()
-print(f"Canto inferior direito: ({x2}, {y2})")
+print(f"Canto inferior direito capturado em: ({x2}, {y2})")
 
 # Calcula a largura e a altura da área
 width = x2 - x1
