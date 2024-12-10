@@ -7,7 +7,7 @@ import zipfile
 # Função para buscar arquivos em pastas, subpastas e arquivos zipados
 def search_files(base_paths, search_codes, specific_path):
     found_files = []
-    
+
     for base_path in base_paths:
         for root, dirs, files in os.walk(base_path):
             # Verifica se o caminho específico é parte do diretório atual
