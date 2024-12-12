@@ -4,30 +4,22 @@ from tkinter import messagebox, filedialog
 from tkinter import ttk
 import zipfile
 from openpyxl import Workbook
-from datetime import datetime
 
-# Função para buscar arquivos em pastas, subpastas e arquivos zipados
+# Função para buscar arquivos em pastas, subpastas e arquivos zipados por data de modificação
 def search_files(base_paths, search_codes, specific_date):
     found_files = []
-    
-    # Converte a data específica em um objeto datetime para comparação
-    specific_datetime = None
-    if specific_date:
-        try:
-            specific_datetime = datetime.strptime(specific_date, "%Y%m%d")
-        except ValueError:
-            messagebox.showerror("Erro", "Formato de data inválido. Use o formato YYYYMMDD.")
-            return []
 
     for base_path in base_paths:
         for root, dirs, files in os.walk(base_path):
             for file in files:
                 full_path = os.path.join(root, file)
-                
-                # Verifica se a data de modificação é posterior ou igual à data especificada
-                file_mtime = datetime.fromtimestamp(os.path.getmtime(full_path))
-                if specific_datetime and file_mtime.date() < specific_datetime.date():
-                    continue
+
+                # Verifica a data de modificação do arquivo
+                if specific_date:
+                    mod_time = os.path.getmtime(full_path)
+                    mod_date = tk.datetime.datetime.fromtimestamp(mod_time).strftime('%Y%m%d')
+                    if specific_date != mod_date:
+                        continue
 
                 if file.endswith(".zip"):
                     try:
@@ -67,7 +59,6 @@ def open_file(filepath):
 
 # Função para preencher a Treeview com os arquivos encontrados
 def populate_tree():
-    # Processar os códigos de busca separados por vírgula
     search_codes = [code.strip() for code in entry_code.get().strip().split(",")]
     specific_date = entry_specific_path.get().strip()
     
@@ -136,7 +127,7 @@ base_paths = []
 
 # Interface gráfica
 root = tk.Tk()
-root.title("Buscar Arquivos por Código e Data de Modificação")
+root.title("Buscar Arquivos por Código")
 root.geometry("800x600")
 
 # Frame de controle
@@ -161,7 +152,7 @@ entry_code.bind("<Return>", lambda event: populate_tree())
 # Entrada para o filtro por data de modificação
 label_specific_path = tk.Label(control_frame, text="Filtro por Data de Modificação (YYYYMMDD):")
 label_specific_path.pack(side=tk.LEFT, padx=5)
-entry_specific_path = ttk.Entry(control_frame, width=40)
+entry_specific_path = ttk.Entry(control_frame, width=20)  # Reduzi a largura para 20
 entry_specific_path.pack(side=tk.LEFT, padx=5)
 
 # Botão para buscar arquivos
