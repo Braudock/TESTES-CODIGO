@@ -1,0 +1,74 @@
+import os
+import tkinter as tk
+from tkinter import messagebox, filedialog
+from tkinter import ttk
+import zipfile
+from openpyxl import Workbook
+from datetime import datetime
+
+# Função para buscar arquivos em pastas, subpastas e arquivos zipados
+def search_files(base_paths, search_codes, specific_date):
+    found_files = []
+    
+    # Converte a data específica em um objeto datetime para comparação
+    specific_datetime = None
+    if specific_date:
+        try:
+            specific_datetime = datetime.strptime(specific_date, "%Y%m%d")
+        except ValueError:
+            messagebox.showerror("Erro", "Formato de data inválido. Use o formato YYYYMMDD.")
+            return []
+
+    for base_path in base_paths:
+        for root, dirs, files in os.walk(base_path):
+            for file in files:
+                full_path = os.path.join(root, file)
+                
+                # Verifica se a data de modificação é posterior ou igual à data especificada
+                file_mtime = datetime.fromtimestamp(os.path.getmtime(full_path))
+                if specific_datetime and file_mtime.date() < specific_datetime.date():
+                    continue
+
+                if file.endswith(".zip"):
+                    try:
+                        with zipfile.ZipFile(full_path, 'r') as z:
+                            for zip_file in z.namelist():
+                                for search_code in search_codes:
+                                    if search_code in zip_file:
+                                        found_files.append((zip_file, f"{full_path} -> {zip_file}"))
+                    except zipfile.BadZipFile:
+                        print(f"Arquivo zip corrompido: {full_path}")
+                else:
+                    for search_code in search_codes:
+                        if search_code in file:
+                            found_files.append((file, full_path))
+    
+    return found_files
+
+# Funções para abrir arquivos, preencher a Treeview e exportar para Excel permanecem as mesmas
+# ...
+
+# Função para preencher a Treeview com os arquivos encontrados
+def populate_tree():
+    # Processar os códigos de busca separados por vírgula
+    search_codes = [code.strip() for code in entry_code.get().strip().split(",")]
+    specific_date = entry_specific_path.get().strip()
+    
+    if not search_codes or search_codes == [""]:
+        messagebox.showwarning("Entrada Vazia", "Por favor, insira um ou mais códigos para buscar.")
+        return
+
+    for item in tree.get_children():
+        tree.delete(item)
+    
+    files = search_files(base_paths, search_codes, specific_date)
+    if not files:
+        messagebox.showinfo("Nenhum Arquivo Encontrado", "Nenhum arquivo encontrado com os filtros especificados.")
+    else:
+        for idx, (filename, filepath) in enumerate(files):
+            tree.insert("", "end", iid=idx, values=(filename, filepath))
+
+# Interface gráfica permanece a mesma
+# ...
+
+root.mainloop()
